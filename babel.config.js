@@ -8,10 +8,18 @@ module.exports = function (api) {
         {
           moduleName: "@env",
           path: ".env",
-          blacklist: null,
-          whitelist: null,
-          safe: false,
-          allowUndefined: true,
+          safe: true,
+          allowUndefined: false,
+        },
+      ],
+      [
+        "module-resolver",
+        {
+          root: ["./src"],
+          extensions: [".js", ".jsx", ".ts", ".tsx"],
+          alias: {
+            "@": "./src",
+          },
         },
       ],
     ],
