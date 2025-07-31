@@ -119,6 +119,21 @@ export interface SearchSuggestion {
   distance?: number;
 }
 
+// 사용자 타입
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  profileImage?: string;
+  provider: 'kakao' | 'guest';
+  preferences: {
+    scenic_route: boolean;
+    prioritize_safety: boolean;
+    avoid_hills: boolean;
+    preferred_speed: 'slow' | 'normal' | 'fast';
+  };
+}
+
 // API 에러 타입
 export interface APIError {
   code: string;
