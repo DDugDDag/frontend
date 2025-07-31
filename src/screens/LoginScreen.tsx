@@ -1,98 +1,93 @@
 // src/screens/LoginScreen.tsx
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Image,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { useAuthRequest, makeRedirectUri, ResponseType } from "expo-auth-session";
+import * as WebBrowser from "expo-web-browser";
+import * as SecureStore from "expo-secure-store";
+import { KAKAO_REST_API_KEY } from "@env";
 import ScreenWrapper from "@/components/layout/ScreenWrapper";
 import { Colors } from "@/constants/Colors";
+import { useAuthStore } from "@/stores/useAuthStore"; // ✅ Zustand 상태 연동
 
-// ❌ OAuth 관련 import 임시 주석처리
-// import {
-//   useAuthRequest,
-//   makeRedirectUri,
-//   ResponseType,
-//   exchangeCodeAsync,
-// } from "expo-auth-session";
-// import * as WebBrowser from "expo-web-browser";
-// import { KAKAO_REST_API_KEY } from "@env";
+WebBrowser.maybeCompleteAuthSession();
 
-// ❌ Kakao OAuth 설정 주석
-// const discovery = {
-//   authorizationEndpoint: "https://kauth.kakao.com/oauth/authorize",
-//   tokenEndpoint: "https://kauth.kakao.com/oauth/token",
-// };
-
-// ❌ WebBrowser.maybeCompleteAuthSession(); // ✅ Web뷰 완료 처리
+const discovery = {
+  authorizationEndpoint: "https://kauth.kakao.com/oauth/authorize",
+  tokenEndpoint: "https://kauth.kakao.com/oauth/token",
+};
 
 export default function LoginScreen() {
   const navigation = useNavigation();
+  const { setToken, setUser } = useAuthStore();
 
-  // ❌ OAuth 관련 코드 주석
-  // const redirectUri = makeRedirectUri({
-  //   native: "ddudda://oauth",
-  //   useProxy: true,
-  // } as any);
+  const redirectUri = makeRedirectUri({
+    native: "ddudda://oauth",
+    useProxy: true,
+  } as any);
 
-  // const [request, response, promptAsync] = useAuthRequest(
-  //   {
-  //     clientId: KAKAO_REST_API_KEY,
-  //     responseType: ResponseType.Code,
-  //     redirectUri,
-  //   },
-  //   discovery
-  // );
+  const [request, response, promptAsync] = useAuthRequest(
+    {
+      clientId: KAKAO_REST_API_KEY,
+      responseType: ResponseType.Code,
+      redirectUri,
+    },
+    discovery
+  );
 
-  // useEffect(() => {
-  //   if (response?.type === "success" && response.params?.code) {
-  //     const fetchTokenAndUser = async () => {
-  //       try {
-  //         const tokenRes = await fetch(discovery.tokenEndpoint!, {
-  //           method: "POST",
-  //           headers: {
-  //             "Content-Type": "application/x-www-form-urlencoded",
-  //           },
-  //           body: `grant_type=authorization_code&client_id=${KAKAO_REST_API_KEY}&redirect_uri=${encodeURIComponent(
-  //             redirectUri
-  //           )}&code=${response.params.code}`,
-  //         });
+  useEffect(() => {
+    if (response?.type === "success" && response.params?.code) {
+      const fetchTokenAndLogin = async () => {
+        try {
+          const tokenRes = await fetch(discovery.tokenEndpoint!, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: `grant_type=authorization_code&client_id=${KAKAO_REST_API_KEY}&redirect_uri=${encodeURIComponent(
+              redirectUri
+            )}&code=${response.params.code}`,
+          });
 
-  //         const tokenData = await tokenRes.json();
+          const tokenData = await tokenRes.json();
+          if (!tokenData.access_token) return Alert.alert("실패", "액세스 토큰 없음");
 
-  //         if (tokenData.access_token) {
-  //           const userRes = await fetch("https://kapi.kakao.com/v2/user/me", {
-  //             headers: {
-  //               Authorization: `Bearer ${tokenData.access_token}`,
-  //             },
-  //           });
-  //           const userData = await userRes.json();
-  //           Alert.alert("환영합니다!", `닉네임: ${userData.kakao_account.profile.nickname}`);
-  //         } else {
-  //           Alert.alert("로그인 실패", "토큰을 가져오지 못했습니다.");
-  //         }
-  //       } catch (error) {
-  //         Alert.alert("오류", "로그인 중 문제가 발생했습니다.");
-  //       }
-  //     };
+          const backendRes = await fetch("http://<YOUR_BACKEND>/api/core/auth/kakao-login", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${tokenData.access_token}` },
+          });
 
-  //     fetchTokenAndUser();
-  //   }
-  // }, [response]);
+          const backendData = await backendRes.json();
+          if (backendData.access_token) {
+            await SecureStore.setItemAsync("jwt", backendData.access_token);
+            setToken(backendData.access_token); // ✅ Zustand에 저장
+            setUser(backendData.user); // ✅ 사용자 정보도 저장
+            navigation.navigate("Home");
+          } else {
+            Alert.alert("실패", "JWT를 받지 못했습니다");
+          }
+        } catch (err) {
+          console.error(err);
+          Alert.alert("오류", "로그인 중 문제 발생");
+        }
+      };
 
-  // ✅ 로그인 버튼 클릭 시 홈으로 이동
-  const handleLogin = () => {
-    navigation.navigate("Home"); // 'Home'은 추후 Stack에 등록되어 있어야 합니다
-  };
+      fetchTokenAndLogin();
+    }
+  }, [response]);
 
   return (
     <ScreenWrapper backgroundColor="#fff" statusBarStyle="dark">
       <View style={styles.container}>
         <Text style={styles.title}>카카오 로그인</Text>
-        <TouchableOpacity onPress={handleLogin}>
+        <TouchableOpacity onPress={() => promptAsync()}>
           <Image
             source={require("@/assets/images/kakao_login_large_wide.png")}
             style={styles.loginBtn}
