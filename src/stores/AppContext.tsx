@@ -12,6 +12,7 @@ interface AppContextType {
   // 편의 액션들
   actions: {
     // 사용자 액션
+    setUser: (user: any) => void;
     loginUser: (profile: any) => void;
     logoutUser: () => void;
     updateUserPreferences: (preferences: Partial<AppState['user']['preferences']>) => void;
@@ -141,6 +142,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // 편의 액션들
   const actions = {
     // 사용자 액션
+    setUser: (user: any) => {
+      dispatch({ type: 'USER_LOGIN_SUCCESS', payload: user });
+    },
+    
     loginUser: (profile: any) => {
       dispatch({ type: 'USER_LOGIN_SUCCESS', payload: profile });
     },

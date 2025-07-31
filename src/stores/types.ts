@@ -1,15 +1,10 @@
 // src/stores/types.ts
-import { BikeStation, RouteResponse, SearchSuggestion } from '../services/types';
+import { BikeStation, RouteResponse, SearchSuggestion, User } from '../services/types';
 
 // 사용자 상태
 export interface UserState {
   isLoggedIn: boolean;
-  profile: {
-    id?: string;
-    name?: string;
-    email?: string;
-    profileImage?: string;
-  } | null;
+  profile: User | null;
   preferences: {
     prioritize_safety: boolean;
     avoid_hills: boolean;
@@ -80,7 +75,7 @@ export interface AppState {
 // 액션 타입들
 export type UserAction =
   | { type: 'USER_LOGIN_START' }
-  | { type: 'USER_LOGIN_SUCCESS'; payload: UserState['profile'] }
+  | { type: 'USER_LOGIN_SUCCESS'; payload: User }
   | { type: 'USER_LOGIN_FAILURE'; payload: string }
   | { type: 'USER_LOGOUT' }
   | { type: 'USER_UPDATE_PREFERENCES'; payload: Partial<UserState['preferences']> }
