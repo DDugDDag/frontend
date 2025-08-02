@@ -45,6 +45,12 @@ export const CompassIcon = ({ size = 24, color = "#666" }: IconProps) => (
   </View>
 );
 
+export const RecordIcon = ({ size = 24, color = "#666" }: IconProps) => (
+  <View style={[styles.iconContainer, { width: size, height: size }]}>
+    <Text style={[styles.icon, { fontSize: size * 0.9, color }]}>✏️</Text>
+  </View>
+);
+
 export const HomeIcon = ({ size = 24, color = "#666" }: IconProps) => (
   <View style={[styles.iconContainer, { width: size, height: size }]}>
     <Text style={[styles.icon, { fontSize: size * 0.9, color }]}>🏠</Text>

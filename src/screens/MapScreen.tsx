@@ -570,19 +570,6 @@ export default function MapScreen() {
           }}
         />
 
-        {/* 하단 네비게이션 (임시) */}
-        <View style={styles.bottomNavigation}>
-          <TouchableOpacity style={styles.navButton}>
-            <CompassIcon size={24} color="#666" />
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.navButton, styles.activeNavButton]}>
-            <HomeIcon size={24} color="#3B1E1E" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navButton} onPress={toggleNavigation}>
-            <MapIcon size={24} color="#666" />
-          </TouchableOpacity>
-        </View>
-
         {/* 주행 시간/거리 입력 모달 */}
         <RideInputModal
           visible={showRideModal}
