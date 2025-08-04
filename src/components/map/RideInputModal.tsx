@@ -146,7 +146,7 @@ export default function RideInputModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: Colors.overlay,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -155,11 +155,11 @@ const styles = StyleSheet.create({
     maxWidth: 400,
   },
   modal: {
-    backgroundColor: "#fff",
+    backgroundColor: Colors.background,
     borderRadius: 20,
     padding: 24,
     elevation: 8,
-    shadowColor: "#000",
+    shadowColor: Colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 12,
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     fontSize: 20,
-    color: "#666",
+    color: Colors.textSecondary,
     padding: 4,
   },
   title: {
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.primary,
     borderRadius: 12,
     paddingHorizontal: 16,
-    backgroundColor: "#F8F9FA",
+    backgroundColor: Colors.backgroundLight,
   },
   input: {
     fontSize: 24,
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   quickSelectTitle: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#666",
+    color: Colors.textSecondary,
     marginBottom: 12,
     textAlign: "center",
   },
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   quickButton: {
-    backgroundColor: Colors.accent,
+    backgroundColor: Colors.primary,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: Colors.backgroundDark,
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: "center",
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#666",
+    color: Colors.textSecondary,
   },
   submitButton: {
     flex: 1,
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
   submitButtonText: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#fff",
+    color: Colors.text,
   },
   illustrationContainer: {
     alignItems: "center",
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
   },
   illustrationText: {
     fontSize: 14,
-    color: "#666",
+    color: Colors.textSecondary,
     textAlign: "center",
   },
 });

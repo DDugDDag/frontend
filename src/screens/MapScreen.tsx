@@ -15,8 +15,8 @@ import Constants from "expo-constants";
 import ScreenWrapper from "@/components/layout/ScreenWrapper";
 import NavigationPanel from "@/components/navigation/NavigationPanel";
 import BikeInfoPanel from "@/components/map/BikeInfoPanel";
-import RideInputModal from "@/components/map/RideInputModal";
 import SmartRouteModal from "@/components/map/SmartRouteModal";
+import SmartRoutePanel from "@/components/map/SmartRoutePanel";
 import {
   SearchIcon,
   StarIcon,
@@ -28,30 +28,11 @@ import { useAppContext } from "@/stores/AppContext";
 import { stationService, aiRouteService } from "@/services";
 import { Colors } from "@/constants/Colors";
 
-interface BikeStation {
-  id: string;
-  lat: number;
-  lng: number;
-  available: number;
-  name: string;
-}
-
-interface NavigationInfo {
-  speed: string;
-  distance: string;
-  duration: string;
-  isNavigating: boolean;
-}
 
 export default function MapScreen() {
   const navigation = useNavigation();
   const { state, actions } = useAppContext();
   const webViewRef = useRef<WebView>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showRideModal, setShowRideModal] = useState(false);
-  const [rideModalType, setRideModalType] = useState<"time" | "distance">(
-    "time"
-  );
   const [showSmartRouteModal, setShowSmartRouteModal] = useState(false);
 
   // 실제 대여소 데이터 로드
@@ -67,7 +48,6 @@ export default function MapScreen() {
   }, [state.map.currentRoute]);
 
   const loadBikeStations = async () => {
-    setIsLoading(true);
     try {
       const response = await stationService.getAllStations();
       if (response.data) {
@@ -152,8 +132,6 @@ export default function MapScreen() {
       }
     } catch (error) {
       console.error("대여소 정보 로드 예외:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -184,7 +162,7 @@ export default function MapScreen() {
         <meta charset="utf-8">
         <title>뚰따 지도</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-        <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${
+        <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=${
           Constants.expoConfig?.extra?.KAKAO_MAP_API_KEY ||
           "5fd93db4631259c8576b6ce26b8fc125"
         }"></script>
@@ -229,14 +207,93 @@ export default function MapScreen() {
     </head>
     <body>
         <div id="map"></div>
+        <div id="error-message" style="display: none; text-align: center; padding: 50px; color: #666;">
+            지도를 로드하는 중입니다...
+        </div>
         <script>
-            var mapContainer = document.getElementById('map');
-            var mapOption = {
-                center: new kakao.maps.LatLng(36.3504, 127.3845), // 대전 중심
-                level: 3
-            };
-            
-            var map = new kakao.maps.Map(mapContainer, mapOption);
+            // Kakao Maps API 로딩 확인 및 오류 처리
+            function initializeMap() {
+                try {
+                    if (typeof kakao === 'undefined' || !kakao.maps) {
+                        throw new Error('Kakao Maps API가 로드되지 않았습니다.');
+                    }
+
+                    var mapContainer = document.getElementById('map');
+                    if (!mapContainer) {
+                        throw new Error('지도 컨테이너를 찾을 수 없습니다.');
+                    }
+
+                    var mapOption = {
+                        center: new kakao.maps.LatLng(36.3504, 127.3845), // 대전 중심
+                        level: 3
+                    };
+                    
+                    var map = new kakao.maps.Map(mapContainer, mapOption);
+                    
+                    // 지도 로드 성공 시 에러 메시지 숨기기
+                    document.getElementById('error-message').style.display = 'none';
+                    mapContainer.style.display = 'block';
+                    
+                    console.log('지도 초기화 성공');
+                    return map;
+                } catch (error) {
+                    console.error('지도 초기화 오류:', error);
+                    showError('지도를 로드할 수 없습니다: ' + error.message);
+                    return null;
+                }
+            }
+
+            function showError(message) {
+                var errorDiv = document.getElementById('error-message');
+                var mapDiv = document.getElementById('map');
+                
+                if (errorDiv && mapDiv) {
+                    errorDiv.innerHTML = message;
+                    errorDiv.style.display = 'block';
+                    mapDiv.style.display = 'none';
+                }
+                
+                // React Native로 에러 메시지 전송
+                if (window.ReactNativeWebView) {
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                        type: 'error',
+                        message: message
+                    }));
+                }
+            }
+
+            // API 로딩 완료 후 지도 초기화
+            var map = null;
+            var initAttempts = 0;
+            var maxAttempts = 10;
+
+            function tryInitialize() {
+                if (typeof kakao !== 'undefined' && kakao.maps) {
+                    map = initializeMap();
+                    if (map) {
+                        setupMapFeatures();
+                    }
+                } else {
+                    initAttempts++;
+                    if (initAttempts < maxAttempts) {
+                        setTimeout(tryInitialize, 500);
+                    } else {
+                        showError('Kakao Maps API 로딩 시간이 초과되었습니다.');
+                    }
+                }
+            }
+
+            // 페이지 로드 시 초기화 시도
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', tryInitialize);
+            } else {
+                tryInitialize();
+            }
+
+            function setupMapFeatures() {
+                if (!map) return;
+                
+                try {
             var stations = ${stationsJS};
             var routePoints = ${currentRouteJS};
             var selectedLocation = ${selectedLocationJS};
@@ -386,14 +443,23 @@ export default function MapScreen() {
             }
             
             // 지도 클릭 이벤트
-            kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
-                var latlng = mouseEvent.latLng;
-                window.ReactNativeWebView?.postMessage(JSON.stringify({
-                    type: 'mapClick',
-                    lat: latlng.getLat(),
-                    lng: latlng.getLng()
-                }));
-            });
+                    kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+                        var latlng = mouseEvent.latLng;
+                        if (window.ReactNativeWebView) {
+                            window.ReactNativeWebView.postMessage(JSON.stringify({
+                                type: 'mapClick',
+                                lat: latlng.getLat(),
+                                lng: latlng.getLng()
+                            }));
+                        }
+                    });
+
+                    console.log('지도 기능 설정 완료');
+                } catch (error) {
+                    console.error('지도 기능 설정 오류:', error);
+                    showError('지도 기능을 설정하는 중 오류가 발생했습니다: ' + error.message);
+                }
+            }
         </script>
     </body>
     </html>
@@ -403,6 +469,12 @@ export default function MapScreen() {
   const handleWebViewMessage = (event: any) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
+
+      if (data.type === "error") {
+        console.error("지도 에러:", data.message);
+        Alert.alert("지도 오류", data.message);
+        return;
+      }
 
       if (data.type === "stationClick") {
         console.log("대여소 클릭:", data.station);
@@ -433,33 +505,19 @@ export default function MapScreen() {
     }
   };
 
-  const handleRideTimeInput = () => {
-    setRideModalType("time");
-    setShowRideModal(true);
-  };
-
-  const handleRideDistanceInput = () => {
-    setRideModalType("distance");
-    setShowRideModal(true);
-  };
-
-  const handleRideModalSubmit = (value: number) => {
-    console.log(`주행 ${rideModalType}:`, value);
-    // TODO: 주행 시간/거리에 따른 경로 생성 로직
-  };
 
   const handleSmartRouteSubmit = async (data: {
-    mode: 'bike' | 'walk';
+    mode: "bike" | "walk";
     time?: number;
     distance?: number;
   }) => {
-    console.log('AI 목적지 추천 요청:', data);
-    
+    console.log("AI 목적지 추천 요청:", data);
+
     try {
       // 현재 위치 정보 (임시로 대전 중심부 사용)
       const currentLocation = {
         lat: 36.3504,
-        lng: 127.3845
+        lng: 127.3845,
       };
 
       // AI 서비스에 경로 추천 요청
@@ -467,36 +525,38 @@ export default function MapScreen() {
         mode: data.mode,
         time: data.time,
         distance: data.distance,
-        currentLocation
+        currentLocation,
       });
 
       if (response.data) {
-        console.log('AI 추천 경로:', response.data);
-        
+        console.log("AI 추천 경로:", response.data);
+
         // 추천된 경로를 앱 상태에 저장
         actions.setRoute({
           route_points: response.data.route,
           summary: {
             distance: response.data.totalDistance,
             duration: response.data.totalDuration,
-            mode: response.data.routeType
+            mode: response.data.routeType,
           },
-          segments: response.data.segments
+          segments: response.data.segments,
         });
 
         // 목적지를 선택된 위치로 설정
         actions.setSelectedLocation(
-          response.data.destination.lat, 
+          response.data.destination.lat,
           response.data.destination.lng
         );
 
-        console.log(`${data.mode === 'bike' ? '따릉이' : '뚜벅이'} 모드 경로 생성 완료!`);
+        console.log(
+          `${data.mode === "bike" ? "따릉이" : "뚜벅이"} 모드 경로 생성 완료!`
+        );
       } else {
-        Alert.alert('오류', 'AI 경로 추천에 실패했습니다. 다시 시도해주세요.');
+        Alert.alert("오류", "AI 경로 추천에 실패했습니다. 다시 시도해주세요.");
       }
     } catch (error) {
-      console.error('AI 경로 추천 오류:', error);
-      Alert.alert('오류', 'AI 경로 추천 중 오류가 발생했습니다.');
+      console.error("AI 경로 추천 오류:", error);
+      Alert.alert("오류", "AI 경로 추천 중 오류가 발생했습니다.");
     }
   };
 
@@ -515,31 +575,16 @@ export default function MapScreen() {
               <SearchIcon size={20} color="#666" />
             </View>
             <Text style={styles.searchPlaceholder}>어디로 갈거유?</Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.favoriteButton}
               onPress={() => setShowSmartRouteModal(true)}
             >
-              <StarIcon size={12} color="#3B1E1E" />
+              <StarIcon size={12} color="#FFCF50" />
               <Text style={styles.favoriteText}>몰라유</Text>
             </TouchableOpacity>
           </TouchableOpacity>
         </View>
 
-        {/* 주행 시간/거리 입력 버튼들 (테스트용) */}
-        <View style={styles.testButtonsContainer}>
-          <TouchableOpacity
-            style={styles.testButton}
-            onPress={handleRideTimeInput}
-          >
-            <Text style={styles.testButtonText}>주행 시간</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.testButton}
-            onPress={handleRideDistanceInput}
-          >
-            <Text style={styles.testButtonText}>주행 거리</Text>
-          </TouchableOpacity>
-        </View>
 
         {/* 지도 WebView */}
         <View style={styles.mapContainer}>
@@ -555,6 +600,21 @@ export default function MapScreen() {
             scrollEnabled={false}
             showsHorizontalScrollIndicator={false}
             showsVerticalScrollIndicator={false}
+            allowsInlineMediaPlayback={true}
+            mediaPlaybackRequiresUserAction={false}
+            allowsBackForwardNavigationGestures={false}
+            mixedContentMode="compatibility"
+            originWhitelist={['*']}
+            allowUniversalAccessFromFileURLs={true}
+            allowFileAccessFromFileURLs={true}
+            onError={(syntheticEvent) => {
+              const { nativeEvent } = syntheticEvent;
+              console.error('WebView error: ', nativeEvent);
+            }}
+            onHttpError={(syntheticEvent) => {
+              const { nativeEvent } = syntheticEvent;
+              console.error('WebView HTTP error: ', nativeEvent);
+            }}
           />
         </View>
 
@@ -563,33 +623,40 @@ export default function MapScreen() {
 
         {/* 바이크 정보 패널 */}
         <BikeInfoPanel
-          visible={!!state.stations.selectedStation && !state.map.isNavigating}
+          visible={
+            !!state.stations.selectedStation &&
+            !state.map.isNavigating &&
+            !state.map.currentRoute
+          }
           onOpenTashuApp={() => {
             console.log("타슈 앱 열기 시도");
             // TODO: 타슈 앱 열기 또는 웹사이트로 이동
           }}
         />
 
+        {/* AI 추천 경로 패널 */}
+        <SmartRoutePanel
+          visible={!!state.map.currentRoute && !state.map.isNavigating}
+          onStartNavigation={() => {
+            console.log("뚜따 내비게이션 시작");
+            actions.startNavigation();
+            // TODO: 뚜따 자체 내비게이션 시작 (NavigationPanel 활성화)
+          }}
+        />
+
         {/* 하단 네비게이션 (임시) */}
         <View style={styles.bottomNavigation}>
-          <TouchableOpacity style={styles.navButton}>
-            <CompassIcon size={24} color="#666" />
-          </TouchableOpacity>
           <TouchableOpacity style={[styles.navButton, styles.activeNavButton]}>
-            <HomeIcon size={24} color="#3B1E1E" />
+            <CompassIcon size={24} color={Colors.text} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navButton}>
+            <HomeIcon size={24} color="#666" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.navButton} onPress={toggleNavigation}>
             <MapIcon size={24} color="#666" />
           </TouchableOpacity>
         </View>
 
-        {/* 주행 시간/거리 입력 모달 */}
-        <RideInputModal
-          visible={showRideModal}
-          type={rideModalType}
-          onClose={() => setShowRideModal(false)}
-          onSubmit={handleRideModalSubmit}
-        />
 
         {/* AI 목적지 추천 모달 */}
         <SmartRouteModal
@@ -605,14 +672,14 @@ export default function MapScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.background,
   },
   searchContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.background,
     elevation: 2,
-    shadowColor: "#000",
+    shadowColor: Colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -620,7 +687,7 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f5f5f5",
+    backgroundColor: Colors.backgroundDark,
     borderRadius: 25,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -636,12 +703,12 @@ const styles = StyleSheet.create({
   searchPlaceholder: {
     flex: 1,
     fontSize: 16,
-    color: "#666",
+    color: Colors.textSecondary,
   },
   favoriteButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.accent,
+    backgroundColor: Colors.primary,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 15,
@@ -660,11 +727,11 @@ const styles = StyleSheet.create({
   },
   bottomNavigation: {
     flexDirection: "row",
-    backgroundColor: "#fff",
+    backgroundColor: Colors.background,
     paddingVertical: 8,
     paddingHorizontal: 16,
     elevation: 4,
-    shadowColor: "#000",
+    shadowColor: Colors.shadow,
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -675,25 +742,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   activeNavButton: {
-    backgroundColor: Colors.accent,
+    backgroundColor: Colors.primary,
     borderRadius: 20,
     marginHorizontal: 4,
-  },
-  testButtonsContainer: {
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    gap: 12,
-  },
-  testButton: {
-    backgroundColor: Colors.primary,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 12,
-  },
-  testButtonText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
   },
 });

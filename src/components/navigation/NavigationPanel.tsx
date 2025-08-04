@@ -1,31 +1,27 @@
 // src/components/navigation/NavigationPanel.tsx
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
-import { useAppContext } from '@/stores/AppContext';
-import { navigationService } from '@/services';
-import { Colors } from '@/constants/Colors';
+import React from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { useAppContext } from "@/stores/AppContext";
+import { navigationService } from "@/services";
+import { Colors } from "@/constants/Colors";
 
 interface NavigationPanelProps {
   onNavigationUpdate?: (data: any) => void;
 }
 
-export default function NavigationPanel({ onNavigationUpdate }: NavigationPanelProps) {
+export default function NavigationPanel({
+  onNavigationUpdate,
+}: NavigationPanelProps) {
   const { state, actions } = useAppContext();
 
   const handleStartNavigation = async () => {
     if (!state.map.currentRoute) {
-      Alert.alert('알림', '경로를 먼저 설정해주세요.');
+      Alert.alert("알림", "경로를 먼저 설정해주세요.");
       return;
     }
 
     try {
-      const routePoints = state.map.currentRoute.route_points.map(point => ({
+      const routePoints = state.map.currentRoute.route_points.map((point) => ({
         lat: point.lat,
         lng: point.lng,
       }));
@@ -47,21 +43,24 @@ export default function NavigationPanel({ onNavigationUpdate }: NavigationPanelP
           }
         },
         (error) => {
-          console.error('내비게이션 오류:', error);
-          Alert.alert('내비게이션 오류', error);
+          console.error("내비게이션 오류:", error);
+          Alert.alert("내비게이션 오류", error);
           actions.stopNavigation();
         }
       );
 
       if (response.data) {
         actions.startNavigation();
-        console.log('실시간 내비게이션 시작됨');
+        console.log("실시간 내비게이션 시작됨");
       } else {
-        Alert.alert('오류', response.error || '내비게이션을 시작할 수 없습니다.');
+        Alert.alert(
+          "오류",
+          response.error || "내비게이션을 시작할 수 없습니다."
+        );
       }
     } catch (error) {
-      console.error('내비게이션 시작 예외:', error);
-      Alert.alert('오류', '내비게이션을 시작할 수 없습니다.');
+      console.error("내비게이션 시작 예외:", error);
+      Alert.alert("오류", "내비게이션을 시작할 수 없습니다.");
     }
   };
 
@@ -69,9 +68,9 @@ export default function NavigationPanel({ onNavigationUpdate }: NavigationPanelP
     try {
       await navigationService.stopNavigation();
       actions.stopNavigation();
-      console.log('실시간 내비게이션 중지됨');
+      console.log("실시간 내비게이션 중지됨");
     } catch (error) {
-      console.error('내비게이션 중지 예외:', error);
+      console.error("내비게이션 중지 예외:", error);
     }
   };
 
@@ -83,13 +82,17 @@ export default function NavigationPanel({ onNavigationUpdate }: NavigationPanelP
           <Text style={styles.routeSummaryTitle}>경로 정보</Text>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>거리: </Text>
-            <Text style={styles.summaryValue}>{state.map.currentRoute.summary.distance} km</Text>
+            <Text style={styles.summaryValue}>
+              {state.map.currentRoute.summary.distance} km
+            </Text>
           </View>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>예상 시간: </Text>
-            <Text style={styles.summaryValue}>{state.map.currentRoute.summary.duration} 분</Text>
+            <Text style={styles.summaryValue}>
+              {state.map.currentRoute.summary.duration} 분
+            </Text>
           </View>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.startNavigationButton}
             onPress={handleStartNavigation}
           >
@@ -106,26 +109,32 @@ export default function NavigationPanel({ onNavigationUpdate }: NavigationPanelP
       <View style={styles.navigationPanel}>
         <View style={styles.navigationHeader}>
           <Text style={styles.navigationTitle}>실시간 안내</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.stopButton}
             onPress={handleStopNavigation}
           >
             <Text style={styles.stopButtonText}>중지</Text>
           </TouchableOpacity>
         </View>
-        
+
         <View style={styles.navigationInfo}>
           <View style={styles.infoItem}>
             <Text style={styles.infoLabel}>현재 속도</Text>
-            <Text style={styles.infoValue}>{state.map.navigationInfo.currentSpeed.toFixed(1)} km/h</Text>
+            <Text style={styles.infoValue}>
+              {state.map.navigationInfo.currentSpeed.toFixed(1)} km/h
+            </Text>
           </View>
           <View style={styles.infoItem}>
             <Text style={styles.infoLabel}>남은 거리</Text>
-            <Text style={styles.infoValue}>{state.map.navigationInfo.remainingDistance.toFixed(2)} km</Text>
+            <Text style={styles.infoValue}>
+              {state.map.navigationInfo.remainingDistance.toFixed(2)} km
+            </Text>
           </View>
           <View style={styles.infoItem}>
             <Text style={styles.infoLabel}>도착 예정</Text>
-            <Text style={styles.infoValue}>{state.map.navigationInfo.estimatedTime} 분</Text>
+            <Text style={styles.infoValue}>
+              {state.map.navigationInfo.estimatedTime} 분
+            </Text>
           </View>
         </View>
       </View>
@@ -137,14 +146,14 @@ export default function NavigationPanel({ onNavigationUpdate }: NavigationPanelP
 
 const styles = StyleSheet.create({
   routeSummaryPanel: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 80,
     left: 16,
     right: 16,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 16,
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -154,21 +163,21 @@ const styles = StyleSheet.create({
   },
   routeSummaryTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Colors.text,
     marginBottom: 12,
   },
   summaryRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginBottom: 8,
   },
   summaryLabel: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   summaryValue: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     color: Colors.text,
   },
   startNavigationButton: {
@@ -176,68 +185,68 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 8,
   },
   startNavigationText: {
-    color: '#fff',
+    color: Colors.text,
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   navigationPanel: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 80,
     left: 16,
     right: 16,
     backgroundColor: Colors.primary,
     borderRadius: 16,
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
   navigationHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 8,
   },
   navigationTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: "bold",
+    color: Colors.text,
   },
   stopButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
   },
   stopButtonText: {
-    color: '#fff',
+    color: Colors.text,
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   navigationInfo: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     paddingHorizontal: 16,
     paddingBottom: 16,
   },
   infoItem: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   infoLabel: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: Colors.text,
     marginBottom: 4,
   },
   infoValue: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: "bold",
+    color: Colors.text,
   },
 });
