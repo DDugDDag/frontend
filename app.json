@@ -8,6 +8,11 @@
     "icon": "./src/assets/images/logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "extra": {
+      "KAKAO_MAP_API_KEY": "5fd93db4631259c8576b6ce26b8fc125",
+      "KAKAO_REST_API_KEY": "5fd93db4631259c8576b6ce26b8fc125",
+      "BACKEND_API_URL": "http://localhost:8000"
+    },
     "splash": {
       "image": "./src/assets/images/logo.png",
       "resizeMode": "contain",

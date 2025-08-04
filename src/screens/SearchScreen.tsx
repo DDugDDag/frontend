@@ -13,7 +13,15 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import ScreenWrapper from "@/components/layout/ScreenWrapper";
-import { BackIcon, LocationIcon, DestinationIcon, MicIcon, BikeStationIcon, LandmarkIcon, PlaceIcon } from "@/components/ui/Icons";
+import {
+  BackIcon,
+  LocationIcon,
+  DestinationIcon,
+  MicIcon,
+  BikeStationIcon,
+  LandmarkIcon,
+  PlaceIcon,
+} from "@/components/ui/Icons";
 import { useAppContext } from "@/stores/AppContext";
 import { searchService, routeService } from "@/services";
 import { SearchSuggestion } from "@/services/types";
@@ -32,11 +40,11 @@ export default function SearchScreen() {
   const { state, actions } = useAppContext();
   const [currentLocation] = useState<LocationInput>({
     location: "현 위치",
-    address: state.map.currentLocation?.address || "대전광역시 서구 둔산동"
+    address: state.map.currentLocation?.address || "대전광역시 서구 둔산동",
   });
   const [destination, setDestination] = useState<LocationInput>({
     location: "",
-    address: ""
+    address: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const destinationInputRef = useRef<TextInput>(null);
@@ -49,15 +57,15 @@ export default function SearchScreen() {
       address: "대전광역시 중구 동성로",
       type: "landmark",
       lat: 36.3247,
-      lng: 127.4206
+      lng: 127.4206,
     },
     {
-      id: "2", 
+      id: "2",
       name: "동성로 하나로마트",
       address: "대전광역시 중구 동성로 123",
       type: "location",
-      lat: 36.3250,
-      lng: 127.4210
+      lat: 36.325,
+      lng: 127.421,
     },
     {
       id: "3",
@@ -65,7 +73,7 @@ export default function SearchScreen() {
       address: "대전광역시 중구 대종로 396",
       type: "landmark",
       lat: 36.3289,
-      lng: 127.4156
+      lng: 127.4156,
     },
     {
       id: "4",
@@ -73,8 +81,8 @@ export default function SearchScreen() {
       address: "대전광역시 중구 동학사길",
       type: "landmark",
       lat: 36.3456,
-      lng: 127.4123
-    }
+      lng: 127.4123,
+    },
   ];
 
   useEffect(() => {
@@ -82,7 +90,7 @@ export default function SearchScreen() {
     setTimeout(() => {
       destinationInputRef.current?.focus();
     }, 300);
-    
+
     // 기본 제안 목록 설정
     actions.setSearchSuggestions(defaultSuggestions);
   }, []);
@@ -106,7 +114,7 @@ export default function SearchScreen() {
       try {
         const currentLat = state.map.currentLocation?.lat || 36.3504;
         const currentLng = state.map.currentLocation?.lng || 127.3845;
-        
+
         const response = await searchService.getAutocompleteSuggestions(
           state.search.query,
           currentLat,
@@ -116,16 +124,21 @@ export default function SearchScreen() {
         if (response.data) {
           actions.setSearchSuggestions(response.data);
         } else if (response.error) {
-          console.error('검색 실패:', response.error);
+          console.error("검색 실패:", response.error);
           // 에러 시 기본 필터링으로 폴백
-          const filtered = defaultSuggestions.filter(item =>
-            item.name.toLowerCase().includes(state.search.query.toLowerCase()) ||
-            item.address?.toLowerCase().includes(state.search.query.toLowerCase())
+          const filtered = defaultSuggestions.filter(
+            (item) =>
+              item.name
+                .toLowerCase()
+                .includes(state.search.query.toLowerCase()) ||
+              item.address
+                ?.toLowerCase()
+                .includes(state.search.query.toLowerCase())
           );
           actions.setSearchSuggestions(filtered);
         }
       } catch (error) {
-        console.error('검색 예외:', error);
+        console.error("검색 예외:", error);
         actions.setSearchSuggestions(defaultSuggestions);
       } finally {
         setIsLoading(false);
@@ -141,12 +154,12 @@ export default function SearchScreen() {
       location: suggestion.name,
       address: suggestion.address || "",
       lat: suggestion.lat,
-      lng: suggestion.lng
+      lng: suggestion.lng,
     });
-    
+
     actions.setSearchQuery(suggestion.name);
     actions.addRecentSearch(suggestion);
-    
+
     // 선택된 위치를 지도 상태에 저장
     if (suggestion.lat && suggestion.lng) {
       actions.setSelectedLocation(
@@ -156,7 +169,7 @@ export default function SearchScreen() {
         suggestion.name
       );
     }
-    
+
     Keyboard.dismiss();
   };
 
@@ -191,7 +204,7 @@ export default function SearchScreen() {
       if (routeResponse.data) {
         // 경로 데이터를 상태에 저장
         actions.setRoute(routeResponse.data);
-        
+
         console.log("경로 찾기 성공:", {
           distance: routeResponse.data.summary.distance,
           duration: routeResponse.data.summary.duration,
@@ -202,7 +215,7 @@ export default function SearchScreen() {
         navigation.navigate("Map" as never);
       } else {
         console.error("경로 찾기 실패:", routeResponse.error);
-        
+
         // 실패 시에도 선택된 위치는 지도에 표시
         actions.setSelectedLocation(
           destination.lat,
@@ -210,12 +223,12 @@ export default function SearchScreen() {
           destination.address,
           destination.location
         );
-        
+
         navigation.navigate("Map" as never);
       }
     } catch (error) {
       console.error("경로 찾기 예외:", error);
-      
+
       // 에러 시에도 지도로 이동 (선택된 위치만 표시)
       navigation.navigate("Map" as never);
     } finally {
@@ -236,23 +249,23 @@ export default function SearchScreen() {
 
   const getIconForSuggestion = (type: string) => {
     switch (type) {
-      case 'station': 
+      case "station":
         return <BikeStationIcon size={16} color="#5B913B" />;
-      case 'landmark': 
+      case "landmark":
         return <LandmarkIcon size={16} color="#666" />;
-      default: 
+      default:
         return <PlaceIcon size={16} color="#666" />;
     }
   };
 
   return (
-    <ScreenWrapper backgroundColor={Colors.accent} paddingHorizontal={0}>
+    <ScreenWrapper backgroundColor={Colors.primary} paddingHorizontal={0}>
       <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" backgroundColor={Colors.accent} />
-        
+        <StatusBar barStyle="dark-content" backgroundColor={Colors.primary} />
+
         {/* 헤더 */}
         <View style={styles.header}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
@@ -265,7 +278,7 @@ export default function SearchScreen() {
         {/* 검색 입력 영역 */}
         <View style={styles.searchInputContainer}>
           {/* 출발지 */}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.locationInputRow}
             onPress={handleCurrentLocationPress}
           >
@@ -273,7 +286,9 @@ export default function SearchScreen() {
               <LocationIcon size={12} color="#5B913B" />
             </View>
             <View style={styles.locationInfo}>
-              <Text style={styles.locationText}>{currentLocation.location}</Text>
+              <Text style={styles.locationText}>
+                {currentLocation.location}
+              </Text>
               <Text style={styles.addressText}>{currentLocation.address}</Text>
             </View>
           </TouchableOpacity>
@@ -305,7 +320,7 @@ export default function SearchScreen() {
         </View>
 
         {/* 검색 제안 목록 */}
-        <ScrollView 
+        <ScrollView
           style={styles.suggestionsContainer}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
@@ -316,24 +331,26 @@ export default function SearchScreen() {
             </View>
           ) : (
             state.search.suggestions.map((suggestion) => (
-            <TouchableOpacity
-              key={suggestion.id}
-              style={styles.suggestionItem}
-              onPress={() => handleSuggestionPress(suggestion)}
-            >
-              <View style={styles.suggestionIcon}>
-                {getIconForSuggestion(suggestion.type)}
-              </View>
-              <View style={styles.suggestionInfo}>
-                <Text style={styles.suggestionName}>{suggestion.name}</Text>
-                {suggestion.address && (
-                  <Text style={styles.suggestionAddress}>{suggestion.address}</Text>
-                )}
-              </View>
-            </TouchableOpacity>
+              <TouchableOpacity
+                key={suggestion.id}
+                style={styles.suggestionItem}
+                onPress={() => handleSuggestionPress(suggestion)}
+              >
+                <View style={styles.suggestionIcon}>
+                  {getIconForSuggestion(suggestion.type)}
+                </View>
+                <View style={styles.suggestionInfo}>
+                  <Text style={styles.suggestionName}>{suggestion.name}</Text>
+                  {suggestion.address && (
+                    <Text style={styles.suggestionAddress}>
+                      {suggestion.address}
+                    </Text>
+                  )}
+                </View>
+              </TouchableOpacity>
             ))
           )}
-          
+
           {/* 빈 공간 (키보드 높이 고려) */}
           <View style={styles.bottomSpacer} />
         </ScrollView>
@@ -341,16 +358,16 @@ export default function SearchScreen() {
         {/* 하단 버튼 영역 */}
         <View style={styles.bottomButtonContainer}>
           {/* 음성 인식 버튼 */}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.voiceButton}
             onPress={handleVoiceInput}
           >
-            <MicIcon size={20} color="#666" />
+            <MicIcon size={20} color="#FFCF50" />
           </TouchableOpacity>
-          
+
           {/* 경로 찾기 버튼 */}
           {destination.location.trim() !== "" && (
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.searchRouteButton}
               onPress={handleSearchRoute}
             >
@@ -372,7 +389,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: Colors.accent,
+    backgroundColor: Colors.primary,
   },
   backButton: {
     width: 40,
@@ -391,13 +408,13 @@ const styles = StyleSheet.create({
     width: 40,
   },
   searchInputContainer: {
-    backgroundColor: "#fff",
+    backgroundColor: Colors.secondary,
     marginHorizontal: 16,
     marginTop: 8,
     borderRadius: 16,
     padding: 16,
     elevation: 2,
-    shadowColor: "#000",
+    shadowColor: Colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -436,13 +453,13 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: "#e0e0e0",
+    backgroundColor: Colors.borderLight,
     marginLeft: 44,
     marginVertical: 8,
   },
   suggestionsContainer: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.secondary,
     marginTop: 16,
   },
   suggestionItem: {
@@ -451,8 +468,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-    backgroundColor: "#fff",
+    borderBottomColor: Colors.borderLight,
+    backgroundColor: Colors.secondary,
   },
   suggestionIcon: {
     width: 20,
@@ -491,20 +508,20 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.secondary,
     borderTopWidth: 1,
-    borderTopColor: "#e0e0e0",
+    borderTopColor: Colors.borderLight,
   },
   voiceButton: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: Colors.backgroundDark,
     alignItems: "center",
     justifyContent: "center",
   },
   searchRouteButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.secondary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 25,
@@ -515,7 +532,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   searchRouteText: {
-    color: "#fff",
+    color: Colors.text,
     fontSize: 16,
     fontWeight: "bold",
   },

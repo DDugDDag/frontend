@@ -1,36 +1,40 @@
 // src/components/map/SmartRoutePanel.tsx
-import React from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Dimensions,
-} from 'react-native';
-import { useAppContext } from '@/stores/AppContext';
-import { Colors } from '@/constants/Colors';
+} from "react-native";
+import { useAppContext } from "@/stores/AppContext";
+import { Colors } from "@/constants/Colors";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 interface SmartRoutePanelProps {
   visible: boolean;
   onStartNavigation?: () => void;
 }
 
-export default function SmartRoutePanel({ visible, onStartNavigation }: SmartRoutePanelProps) {
+export default function SmartRoutePanel({
+  visible,
+  onStartNavigation,
+}: SmartRoutePanelProps) {
   const { state } = useAppContext();
   const currentRoute = state.map.currentRoute;
+  const [selectedMode, setSelectedMode] = useState<"bike" | "walk">(currentRoute?.summary?.mode || "bike");
 
   if (!visible || !currentRoute) {
     return null;
   }
 
-  const routeMode = currentRoute.summary?.mode || 'bike';
+  const routeMode = selectedMode;
   const totalDuration = currentRoute.summary?.duration || 15;
   const totalDistance = currentRoute.summary?.distance || 2.5;
 
   const handleStartNavigation = () => {
-    console.log('내비게이션 시작');
+    console.log("내비게이션 시작");
     if (onStartNavigation) {
       onStartNavigation();
     }
@@ -39,69 +43,80 @@ export default function SmartRoutePanel({ visible, onStartNavigation }: SmartRou
   return (
     <View style={styles.container}>
       <View style={styles.panel}>
-        {/* 모드 선택 탭 (표시용) */}
+        {/* 모드 선택 탭 (클릭 가능) */}
         <View style={styles.modeSelector}>
-          <View style={[
-            styles.modeTab,
-            routeMode === 'bike' && styles.modeTabActive
-          ]}>
-            <Text style={[
-              styles.modeTabText,
-              routeMode === 'bike' && styles.modeTabTextActive
-            ]}>
+          <TouchableOpacity
+            style={[
+              styles.modeTab,
+              routeMode === "bike" && styles.modeTabActive,
+            ]}
+            onPress={() => setSelectedMode("bike")}
+          >
+            <Text
+              style={[
+                styles.modeTabText,
+                routeMode === "bike" && styles.modeTabTextActive,
+              ]}
+            >
               따릉
             </Text>
-          </View>
-          <View style={[
-            styles.modeTab,
-            routeMode === 'walk' && styles.modeTabActive
-          ]}>
-            <Text style={[
-              styles.modeTabText,
-              routeMode === 'walk' && styles.modeTabTextActive
-            ]}>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.modeTab,
+              routeMode === "walk" && styles.modeTabActive,
+            ]}
+            onPress={() => setSelectedMode("walk")}
+          >
+            <Text
+              style={[
+                styles.modeTabText,
+                routeMode === "walk" && styles.modeTabTextActive,
+              ]}
+            >
               뚜벅
             </Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         {/* 경로 정보 */}
         <View style={styles.routeInfo}>
           <View style={styles.navigationIcon}>
-            <Text style={styles.navigationEmoji}>🧭</Text>
-            <Text style={styles.navigationText}>내비게이션 시작</Text>
+            <Text style={styles.navigationEmoji}>
+              {routeMode === "bike" ? "🚲" : "🚶‍♂️"}
+            </Text>
           </View>
-          
+
           <View style={styles.routeDetails}>
             <Text style={styles.routeModeTitle}>
-              {routeMode === 'bike' ? '따릉 모드' : '뚜벅 모드'}
+              {routeMode === "bike" ? "따릉 모드" : "뚜벅 모드"}
             </Text>
             <Text style={styles.routeTime}>
-              총 이동시간 <Text style={styles.routeTimeValue}>{totalDuration}분</Text>
+              총 이동시간{" "}
+              <Text style={styles.routeTimeValue}>{totalDuration}분</Text>
             </Text>
           </View>
         </View>
 
-        {/* 자전거/캐릭터 일러스트 */}
-        <View style={styles.illustrationContainer}>
-          {routeMode === 'bike' ? (
-            <View style={styles.bikeIllustration}>
-              <Text style={styles.bikeEmoji}>🚲</Text>
-            </View>
-          ) : (
-            <View style={styles.walkIllustration}>
-              <Text style={styles.walkEmoji}>🚶‍♂️</Text>
-            </View>
-          )}
-        </View>
+        {/* 액션 버튼들 */}
+        <View style={styles.actionButtons}>
+          <TouchableOpacity
+            style={styles.navigationButton}
+            onPress={handleStartNavigation}
+          >
+            <Text style={styles.navigationButtonText}>내비게이션 시작</Text>
+          </TouchableOpacity>
 
-        {/* 타슈 앱 열기 버튼 */}
-        <TouchableOpacity 
-          style={styles.startButton} 
-          onPress={handleStartNavigation}
-        >
-          <Text style={styles.startButtonText}>타슈 앱 열기</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.tashuButton}
+            onPress={() => {
+              console.log("타슈 앱 열기");
+              // TODO: 실제 타슈 앱 열기 구현
+            }}
+          >
+            <Text style={styles.tashuButtonText}>타슈 앱 열기</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -109,28 +124,28 @@ export default function SmartRoutePanel({ visible, onStartNavigation }: SmartRou
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
-    bottom: 60, // 하단 네비게이션 위에 위치
+    position: "absolute",
+    bottom: 90, // 하단 네비게이션 위에 여유 공간 확보
     left: 0,
     right: 0,
     zIndex: 1000,
   },
   panel: {
-    backgroundColor: '#FFCF50',
+    backgroundColor: "#FFCF50",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingTop: 16,
     paddingBottom: 20,
     paddingHorizontal: 20,
     elevation: 8,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
   },
   modeSelector: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.3)',
+    flexDirection: "row",
+    backgroundColor: "rgba(255,255,255,0.3)",
     borderRadius: 25,
     padding: 4,
     marginBottom: 16,
@@ -140,26 +155,26 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   modeTabActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.secondary,
   },
   modeTabText: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
+    fontWeight: "600",
+    color: Colors.textSecondary,
   },
   modeTabTextActive: {
-    color: '#fff',
+    color: Colors.text,
   },
   routeInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 16,
   },
   navigationIcon: {
-    alignItems: 'center',
+    alignItems: "center",
     marginRight: 16,
   },
   navigationEmoji: {
@@ -168,29 +183,29 @@ const styles = StyleSheet.create({
   },
   navigationText: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#3B1E1E',
+    fontWeight: "600",
+    color: Colors.text,
   },
   routeDetails: {
     flex: 1,
   },
   routeModeTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#3B1E1E',
+    fontWeight: "bold",
+    color: "#3B1E1E",
     marginBottom: 4,
   },
   routeTime: {
     fontSize: 14,
-    color: '#3B1E1E',
+    color: "#3B1E1E",
   },
   routeTimeValue: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#3B1E1E',
+    fontWeight: "bold",
+    color: "#3B1E1E",
   },
   illustrationContainer: {
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
     marginBottom: 16,
   },
   bikeIllustration: {
@@ -205,21 +220,46 @@ const styles = StyleSheet.create({
   walkEmoji: {
     fontSize: 48,
   },
-  startButton: {
-    backgroundColor: Colors.primary,
+  actionButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  navigationButton: {
+    flex: 1,
+    backgroundColor: Colors.secondary,
     paddingVertical: 14,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     borderRadius: 25,
-    alignItems: 'center',
+    alignItems: "center",
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
-  startButtonText: {
-    color: '#fff',
+  navigationButtonText: {
+    color: Colors.text,
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
+  },
+  tashuButton: {
+    flex: 1,
+    backgroundColor: Colors.secondary,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: Colors.primary,
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+  },
+  tashuButtonText: {
+    color: Colors.text,
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });

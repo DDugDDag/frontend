@@ -15,7 +15,7 @@ interface SmartRouteModalProps {
   visible: boolean;
   onClose: () => void;
   onSubmit: (data: {
-    mode: 'bike' | 'walk';
+    mode: "bike" | "walk";
     time?: number;
     distance?: number;
   }) => void;
@@ -26,7 +26,7 @@ export default function SmartRouteModal({
   onClose,
   onSubmit,
 }: SmartRouteModalProps) {
-  const [selectedMode, setSelectedMode] = useState<'bike' | 'walk'>('bike');
+  const [selectedMode, setSelectedMode] = useState<"bike" | "walk">("bike");
   const [timeValue, setTimeValue] = useState("");
   const [distanceValue, setDistanceValue] = useState("");
 
@@ -54,7 +54,7 @@ export default function SmartRouteModal({
       time,
       distance,
     });
-    
+
     // 입력값 초기화
     setTimeValue("");
     setDistanceValue("");
@@ -67,8 +67,8 @@ export default function SmartRouteModal({
     onClose();
   };
 
-  const quickTimeValues = [10, 20, 30, 45, 60, 90];
-  const quickDistanceValues = [0.5, 1.0, 2.0, 3.0, 5.0, 8.0];
+  const quickTimeValues = [10, 20, 30, 45, 60];
+  const quickDistanceValues = [0.5, 1.0, 2.0, 3.0, 5.0];
 
   // 모든 필수 정보가 입력되었는지 확인
   const isComplete = selectedMode && (timeValue || distanceValue);
@@ -89,11 +89,21 @@ export default function SmartRouteModal({
                 <Text style={styles.closeButton}>✕</Text>
               </TouchableOpacity>
               <Text style={styles.title}>자전거 탈거유 말거유</Text>
-              <TouchableOpacity 
-                style={[styles.checkButton, !isComplete && styles.checkButtonDisabled]}
+              <TouchableOpacity
+                style={[
+                  styles.checkButton,
+                  !isComplete && styles.checkButtonDisabled,
+                ]}
                 onPress={isComplete ? handleSubmit : undefined}
               >
-                <Text style={[styles.checkButtonText, !isComplete && styles.checkButtonTextDisabled]}>✓</Text>
+                <Text
+                  style={[
+                    styles.checkButtonText,
+                    !isComplete && styles.checkButtonTextDisabled,
+                  ]}
+                >
+                  ✓
+                </Text>
               </TouchableOpacity>
             </View>
 
@@ -102,28 +112,32 @@ export default function SmartRouteModal({
               <TouchableOpacity
                 style={[
                   styles.modeTab,
-                  selectedMode === 'bike' && styles.modeTabActive
+                  selectedMode === "bike" && styles.modeTabActive,
                 ]}
-                onPress={() => setSelectedMode('bike')}
+                onPress={() => setSelectedMode("bike")}
               >
-                <Text style={[
-                  styles.modeTabText,
-                  selectedMode === 'bike' && styles.modeTabTextActive
-                ]}>
+                <Text
+                  style={[
+                    styles.modeTabText,
+                    selectedMode === "bike" && styles.modeTabTextActive,
+                  ]}
+                >
                   자전거
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
                   styles.modeTab,
-                  selectedMode === 'walk' && styles.modeTabActive
+                  selectedMode === "walk" && styles.modeTabActive,
                 ]}
-                onPress={() => setSelectedMode('walk')}
+                onPress={() => setSelectedMode("walk")}
               >
-                <Text style={[
-                  styles.modeTabText,
-                  selectedMode === 'walk' && styles.modeTabTextActive
-                ]}>
+                <Text
+                  style={[
+                    styles.modeTabText,
+                    selectedMode === "walk" && styles.modeTabTextActive,
+                  ]}
+                >
                   걷기
                 </Text>
               </TouchableOpacity>
@@ -145,7 +159,7 @@ export default function SmartRouteModal({
                 />
                 <Text style={styles.unit}>분</Text>
               </View>
-              
+
               {/* 빠른 선택 버튼들 */}
               <View style={styles.quickButtonsContainer}>
                 {quickTimeValues.map((value) => (
@@ -154,9 +168,7 @@ export default function SmartRouteModal({
                     style={styles.quickButton}
                     onPress={() => setTimeValue(value.toString())}
                   >
-                    <Text style={styles.quickButtonText}>
-                      {value}분
-                    </Text>
+                    <Text style={styles.quickButtonText}>{value}분</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -178,7 +190,7 @@ export default function SmartRouteModal({
                 />
                 <Text style={styles.unit}>km</Text>
               </View>
-              
+
               {/* 빠른 선택 버튼들 */}
               <View style={styles.quickButtonsContainer}>
                 {quickDistanceValues.map((value) => (
@@ -187,9 +199,7 @@ export default function SmartRouteModal({
                     style={styles.quickButton}
                     onPress={() => setDistanceValue(value.toString())}
                   >
-                    <Text style={styles.quickButtonText}>
-                      {value}km
-                    </Text>
+                    <Text style={styles.quickButtonText}>{value}km</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -198,13 +208,14 @@ export default function SmartRouteModal({
             {/* 하단 일러스트 영역 */}
             <View style={styles.illustrationContainer}>
               <Text style={styles.illustration}>
-                {selectedMode === 'bike' ? '🚲' : '🚶‍♂️'}
+                {selectedMode === "bike" ? "🚲" : "🚶‍♂️"}
               </Text>
               <Text style={styles.illustrationText}>
-                {isComplete 
-                  ? (selectedMode === 'bike' ? 'AI가 따릉이 코스를 추천해드릴게유!' : 'AI가 뚜벅이 코스를 추천해드릴게유!')
-                  : '정보를 입력하고 상단 ✓ 버튼을 눌러주세요'
-                }
+                {isComplete
+                  ? selectedMode === "bike"
+                    ? "AI가 따릉이 코스를 추천해드릴게유!"
+                    : "AI가 뚜벅이 코스를 추천해드릴게유!"
+                  : "정보를 입력하고 상단 ✓ 버튼을 눌러주세요"}
               </Text>
             </View>
           </View>
@@ -217,7 +228,7 @@ export default function SmartRouteModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: Colors.overlay,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -226,11 +237,11 @@ const styles = StyleSheet.create({
     maxWidth: 400,
   },
   modal: {
-    backgroundColor: "#fff",
+    backgroundColor: Colors.background,
     borderRadius: 20,
     padding: 24,
     elevation: 8,
-    shadowColor: "#000",
+    shadowColor: Colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 12,
@@ -243,7 +254,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     fontSize: 20,
-    color: "#666",
+    color: Colors.textSecondary,
     padding: 4,
     width: 28,
   },
@@ -263,19 +274,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   checkButtonDisabled: {
-    backgroundColor: "#ccc",
+    backgroundColor: Colors.textLight,
   },
   checkButtonText: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#fff",
+    color: Colors.text,
   },
   checkButtonTextDisabled: {
-    color: "#999",
+    color: Colors.textLight,
   },
   modeSelector: {
     flexDirection: "row",
-    backgroundColor: "#F5F5F5",
+    backgroundColor: Colors.backgroundDark,
     borderRadius: 25,
     padding: 4,
     marginBottom: 24,
@@ -293,10 +304,10 @@ const styles = StyleSheet.create({
   modeTabText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#666",
+    color: Colors.textSecondary,
   },
   modeTabTextActive: {
-    color: "#fff",
+    color: Colors.text,
   },
   inputSection: {
     marginBottom: 24,
@@ -316,7 +327,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.primary,
     borderRadius: 12,
     paddingHorizontal: 16,
-    backgroundColor: "#F8F9FA",
+    backgroundColor: Colors.backgroundLight,
     marginBottom: 16,
   },
   input: {
@@ -340,7 +351,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   quickButton: {
-    backgroundColor: Colors.accent,
+    backgroundColor: Colors.primary,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 15,
@@ -362,7 +373,7 @@ const styles = StyleSheet.create({
   },
   illustrationText: {
     fontSize: 14,
-    color: "#666",
+    color: Colors.textSecondary,
     textAlign: "center",
   },
 });

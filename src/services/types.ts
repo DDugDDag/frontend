@@ -48,6 +48,7 @@ export interface RouteInstruction {
 export interface RouteSummary {
   distance: number; // km
   duration: number; // minutes
+  mode?: 'bike' | 'walk'; // 이동 모드
   elevation_gain?: number; // meters
   safety_score?: number; // 0-1
   confidence_score?: number; // 0-1
