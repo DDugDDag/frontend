@@ -5,16 +5,18 @@
     "scheme": "ddudda",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./src/assets/images/logo.png",
+    "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "extra": {
-      "KAKAO_MAP_API_KEY": "5fd93db4631259c8576b6ce26b8fc125",
-      "KAKAO_REST_API_KEY": "5fd93db4631259c8576b6ce26b8fc125",
+      "KAKAO_MAP_API_KEY": "56ac12d7a683657de44a0eb57d30fe28",
+      "KAKAO_REST_API_KEY": "d8e8864518cbfa343f7de2c130b20e4e",
+      "KAKAO_NATIVE_APP_KEY": "15107af70ffc7646a128bd53e0ff9c3e",
+      "KAKAO_ADMIN_KEY": "3e32df8c56eb05f891be69ff32737c38",
       "BACKEND_API_URL": "http://localhost:8000"
     },
     "splash": {
-      "image": "./src/assets/images/logo.png",
+      "image": "./assets/logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -31,14 +33,15 @@
     "android": {
       "jsEngine": "jsc",
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/images/logo.png",
+        "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION", "INTERNET"],
+      "usesCleartextTraffic": false
     },
     "web": {
-      "favicon": "./src/assets/images/logo.png"
+      "favicon": "./assets/logo.png"
     },
     "plugins": [
       [

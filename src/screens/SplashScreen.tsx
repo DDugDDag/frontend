@@ -11,7 +11,7 @@ export default function SplashScreen() {
     <ScreenWrapper backgroundColor={Colors.primary}>
       <View style={styles.container}>
         <Image
-          source={require("@/assets/images/logo.png")}
+          source={require("../../assets/logo.png")}
           style={styles.logo}
         />
         <TouchableOpacity

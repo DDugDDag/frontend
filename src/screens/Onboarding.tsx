@@ -21,19 +21,19 @@ const slides = [
     key: "1",
     title: "위치",
     description: "위치 기반 실시간 여행",
-    image: require("@/assets/images/onboarding/onboarding1.png"),
+    image: require("../../assets/onboarding/onboarding1.png"),
   },
   {
     key: "2",
     title: "대여",
     description: "로컬 공공자전거 대여 연계",
-    image: require("@/assets/images/onboarding/onboarding2.png"),
+    image: require("../../assets/onboarding/onboarding2.png"),
   },
   {
     key: "3",
     title: "여행",
     description: "기억에 남는 자전거 여행",
-    image: require("@/assets/images/onboarding/onboarding3.png"),
+    image: require("../../assets/onboarding/onboarding3.png"),
   },
 ];
 
