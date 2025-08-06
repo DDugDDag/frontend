@@ -23,7 +23,9 @@ export default function SmartRoutePanel({
 }: SmartRoutePanelProps) {
   const { state } = useAppContext();
   const currentRoute = state.map.currentRoute;
-  const [selectedMode, setSelectedMode] = useState<"bike" | "walk">(currentRoute?.summary?.mode || "bike");
+  const [selectedMode, setSelectedMode] = useState<"bike" | "walk">(
+    currentRoute?.summary?.mode || "bike"
+  );
 
   if (!visible || !currentRoute) {
     return null;
@@ -125,7 +127,7 @@ export default function SmartRoutePanel({
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    bottom: 90, // 하단 네비게이션 위에 여유 공간 확보
+    bottom: 70, // 하단 네비게이션 위에 여유 공간 확보
     left: 0,
     right: 0,
     zIndex: 1000,

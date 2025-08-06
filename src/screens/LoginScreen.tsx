@@ -35,7 +35,9 @@ export default function LoginScreen() {
         console.log("카카오 로그인 성공:", response.data.user);
 
         // 메인 화면으로 이동
-        navigation.navigate("Map" as never);
+        navigation.navigate("MainTabs", {
+          screen: "Home",
+        });
       } else {
         Alert.alert("로그인 실패", response.error || "로그인에 실패했습니다.");
       }
@@ -63,7 +65,7 @@ export default function LoginScreen() {
       },
     });
 
-    navigation.navigate("Map" as never);
+    navigation.navigate("MainTabs" as never);
   };
 
   return (
@@ -74,8 +76,8 @@ export default function LoginScreen() {
         {/* 로고 영역 */}
         <View style={styles.logoContainer}>
           <View style={styles.logoCircle}>
-            <Image 
-              source={require("../../assets/logo.png")} 
+            <Image
+              source={require("../../assets/logo.png")}
               style={styles.logoImage}
               resizeMode="contain"
             />

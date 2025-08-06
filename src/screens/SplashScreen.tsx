@@ -13,6 +13,7 @@ export default function SplashScreen() {
         <Image
           source={require("../../assets/logo.png")}
           style={styles.logo}
+          resizeMode="contain"
         />
         <TouchableOpacity
           style={styles.button}
@@ -31,7 +32,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  logo: { width: 100, height: 100, marginBottom: 50 },
+  logo: { width: 100, height: undefined, aspectRatio: 1, marginBottom: 50 },
   button: {
     backgroundColor: "white",
     paddingHorizontal: 40,

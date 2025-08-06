@@ -89,7 +89,7 @@ export default function BikeInfoPanel({
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    bottom: 60, // 하단 네비게이션 위에 위치
+    bottom: 70, // 하단 네비게이션 위에 위치
     left: 0,
     right: 0,
     zIndex: 1000,

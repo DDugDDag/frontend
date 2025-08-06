@@ -147,7 +147,7 @@ export default function NavigationPanel({
 const styles = StyleSheet.create({
   routeSummaryPanel: {
     position: "absolute",
-    bottom: 80,
+    bottom: 70,
     left: 16,
     right: 16,
     backgroundColor: "#fff",
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   },
   navigationPanel: {
     position: "absolute",
-    bottom: 80,
+    bottom: 70,
     left: 16,
     right: 16,
     backgroundColor: Colors.primary,
