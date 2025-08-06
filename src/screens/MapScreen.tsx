@@ -162,10 +162,90 @@ export default function MapScreen() {
         <meta charset="utf-8">
         <title>뚰따 지도</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-        <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=${
-          Constants.expoConfig?.extra?.KAKAO_MAP_API_KEY ||
-          "5fd93db4631259c8576b6ce26b8fc125"
-        }"></script>
+        <script type="text/javascript">
+            // WebView와 React Native 간 메시지 전송 함수
+            function sendMessage(type, data) {
+                try {
+                    if (window.ReactNativeWebView) {
+                        window.ReactNativeWebView.postMessage(JSON.stringify({
+                            type: type,
+                            data: data
+                        }));
+                    }
+                } catch (error) {
+                    console.error('메시지 전송 실패:', error);
+                }
+            }
+            
+            // WebView 시작 메시지
+            sendMessage('webview_started', 'WebView HTML 로드 완료');
+            
+            // 현재 WebView 환경 정보 로그
+            var envInfo = {
+                userAgent: navigator.userAgent,
+                origin: window.location.origin,
+                protocol: window.location.protocol,
+                host: window.location.host,
+                hostname: window.location.hostname,
+                port: window.location.port,
+                pathname: window.location.pathname,
+                search: window.location.search,
+                hash: window.location.hash,
+                href: window.location.href
+            };
+            
+            console.log('WebView Environment Info:', envInfo);
+            sendMessage('webview_environment', envInfo);
+            
+            // Kakao Maps SDK 로드 시도
+            var script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = 'https://dapi.kakao.com/v2/maps/sdk.js?appkey=${
+              Constants.expoConfig?.extra?.KAKAO_MAP_API_KEY ||
+              "5fd93db4631259c8576b6ce26b8fc125"
+            }';
+            
+            script.onload = function() {
+                console.log('✅ Kakao Maps SDK 로딩 성공');
+                sendMessage('kakao_sdk_loaded', '✅ Kakao Maps SDK 로딩 성공');
+                
+                // 지도 초기화 콜백 호출
+                if (typeof window.onKakaoSDKLoaded === 'function') {
+                    window.onKakaoSDKLoaded();
+                }
+            };
+            
+            script.onerror = function(event) {
+                console.error('❌ Kakao Maps SDK 로딩 실패:', event);
+                sendMessage('kakao_sdk_error', '❌ Kakao Maps SDK 로딩 실패: ' + event.toString());
+                
+                // 네트워크 연결 테스트
+                fetch('https://www.google.com', { mode: 'no-cors' })
+                    .then(() => {
+                        console.log('✅ 네트워크 연결 정상');
+                        sendMessage('network_test', '✅ 네트워크 연결 정상');
+                    })
+                    .catch(err => {
+                        console.error('❌ 네트워크 연결 실패:', err);
+                        sendMessage('network_test', '❌ 네트워크 연결 실패: ' + err.toString());
+                    });
+                    
+                // Kakao API 서버 직접 테스트
+                fetch('https://dapi.kakao.com/', { mode: 'no-cors' })
+                    .then(() => {
+                        console.log('✅ Kakao API 서버 접근 가능');
+                        sendMessage('kakao_server_test', '✅ Kakao API 서버 접근 가능');
+                    })
+                    .catch(err => {
+                        console.error('❌ Kakao API 서버 접근 실패:', err);
+                        sendMessage('kakao_server_test', '❌ Kakao API 서버 접근 실패: ' + err.toString());
+                    });
+            };
+            
+            sendMessage('kakao_sdk_loading', '🔄 Kakao Maps SDK 로드 시작: ' + script.src);
+            console.log('🔄 Kakao Maps SDK 로드 시작:', script.src);
+            document.head.appendChild(script);
+        </script>
         <style>
             body { margin: 0; padding: 0; }
             #map { width: 100%; height: 100vh; }
@@ -264,31 +344,77 @@ export default function MapScreen() {
 
             // API 로딩 완료 후 지도 초기화
             var map = null;
-            var initAttempts = 0;
-            var maxAttempts = 10;
 
-            function tryInitialize() {
-                if (typeof kakao !== 'undefined' && kakao.maps) {
-                    map = initializeMap();
-                    if (map) {
-                        setupMapFeatures();
+            // Kakao SDK 로딩 완료 시 호출될 전역 함수
+            window.onKakaoSDKLoaded = function() {
+                console.log('🎯 Kakao SDK 로딩 완료 - kakao.maps 객체 준비 대기');
+                
+                // kakao.maps 객체가 완전히 준비될 때까지 대기
+                var checkCount = 0;
+                var checkInterval = setInterval(function() {
+                    checkCount++;
+                    
+                    // 현재 상태 로깅
+                    var status = {
+                        attempt: checkCount,
+                        kakaoExists: typeof kakao !== 'undefined',
+                        mapsExists: typeof kakao !== 'undefined' && !!kakao.maps,
+                        latLngExists: typeof kakao !== 'undefined' && kakao.maps && !!kakao.maps.LatLng,
+                        mapExists: typeof kakao !== 'undefined' && kakao.maps && !!kakao.maps.Map,
+                        overlayExists: typeof kakao !== 'undefined' && kakao.maps && !!kakao.maps.CustomOverlay
+                    };
+                    
+                    if (checkCount % 10 === 0) { // 1초마다 상태 로그
+                        console.log('🔍 kakao.maps 객체 체크:', status);
+                        sendMessage('kakao_maps_check', status);
                     }
-                } else {
-                    initAttempts++;
-                    if (initAttempts < maxAttempts) {
-                        setTimeout(tryInitialize, 500);
-                    } else {
-                        showError('Kakao Maps API 로딩 시간이 초과되었습니다.');
+                    
+                    if (typeof kakao !== 'undefined' && 
+                        kakao.maps && 
+                        kakao.maps.LatLng && 
+                        kakao.maps.Map &&
+                        kakao.maps.CustomOverlay) {
+                        
+                        clearInterval(checkInterval);
+                        console.log('✅ kakao.maps 객체 준비 완료 - 지도 초기화 시작');
+                        sendMessage('kakao_maps_ready', '✅ kakao.maps 객체 준비 완료');
+                        
+                        try {
+                            map = initializeMap();
+                            if (map) {
+                                console.log('✅ 지도 초기화 성공');
+                                sendMessage('map_init_success', '✅ 지도 초기화 성공');
+                                setupMapFeatures();
+                            } else {
+                                console.error('❌ 지도 초기화 실패');
+                                showError('지도 초기화에 실패했습니다.');
+                            }
+                        } catch (error) {
+                            console.error('❌ 지도 초기화 중 예외:', error);
+                            showError('지도 초기화 중 오류가 발생했습니다: ' + error.message);
+                        }
                     }
-                }
-            }
-
-            // 페이지 로드 시 초기화 시도
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', tryInitialize);
-            } else {
-                tryInitialize();
-            }
+                }, 100); // 100ms마다 확인
+                
+                // 10초 후에도 준비되지 않으면 타임아웃 (더 긴 시간 허용)
+                setTimeout(function() {
+                    clearInterval(checkInterval);
+                    if (!map) {
+                        var finalStatus = {
+                            kakaoExists: typeof kakao !== 'undefined',
+                            mapsExists: typeof kakao !== 'undefined' && !!kakao.maps,
+                            latLngExists: typeof kakao !== 'undefined' && kakao.maps && !!kakao.maps.LatLng,
+                            mapExists: typeof kakao !== 'undefined' && kakao.maps && !!kakao.maps.Map,
+                            overlayExists: typeof kakao !== 'undefined' && kakao.maps && !!kakao.maps.CustomOverlay,
+                            totalAttempts: checkCount
+                        };
+                        
+                        console.error('❌ kakao.maps 객체 초기화 타임아웃:', finalStatus);
+                        sendMessage('kakao_maps_timeout', finalStatus);
+                        showError('지도 초기화 시간이 초과되었습니다. 상태: ' + JSON.stringify(finalStatus));
+                    }
+                }, 10000);
+            };
 
             function setupMapFeatures() {
                 if (!map) return;
@@ -470,6 +596,62 @@ export default function MapScreen() {
     try {
       const data = JSON.parse(event.nativeEvent.data);
 
+      // WebView 진단 메시지들 처리
+      if (data.type === "webview_started") {
+        console.log("🚀 WebView:", data.data);
+        return;
+      }
+
+      if (data.type === "webview_environment") {
+        console.log("🌍 WebView 환경 정보:", data.data);
+        return;
+      }
+
+      if (data.type === "kakao_sdk_loading") {
+        console.log("🔄 Kakao SDK:", data.data);
+        return;
+      }
+
+      if (data.type === "kakao_sdk_loaded") {
+        console.log("✅ Kakao SDK:", data.data);
+        return;
+      }
+
+      if (data.type === "kakao_sdk_error") {
+        console.error("❌ Kakao SDK:", data.data);
+        return;
+      }
+
+      if (data.type === "network_test") {
+        console.log("🌐 네트워크 테스트:", data.data);
+        return;
+      }
+
+      if (data.type === "kakao_server_test") {
+        console.log("🏢 Kakao 서버 테스트:", data.data);
+        return;
+      }
+
+      if (data.type === "kakao_maps_ready") {
+        console.log("🎯 Kakao Maps:", data.data);
+        return;
+      }
+
+      if (data.type === "map_init_success") {
+        console.log("🗺️ 지도 초기화:", data.data);
+        return;
+      }
+
+      if (data.type === "kakao_maps_check") {
+        console.log("🔍 kakao.maps 객체 체크:", data.data);
+        return;
+      }
+
+      if (data.type === "kakao_maps_timeout") {
+        console.error("⏰ kakao.maps 타임아웃:", data.data);
+        return;
+      }
+
       if (data.type === "error") {
         console.error("지도 에러:", data.message);
         Alert.alert("지도 오류", data.message);
@@ -596,17 +778,12 @@ export default function MapScreen() {
             javaScriptEnabled={true}
             domStorageEnabled={true}
             startInLoadingState={true}
-            scalesPageToFit={true}
             scrollEnabled={false}
             showsHorizontalScrollIndicator={false}
             showsVerticalScrollIndicator={false}
+            originWhitelist={['*']}
             allowsInlineMediaPlayback={true}
             mediaPlaybackRequiresUserAction={false}
-            allowsBackForwardNavigationGestures={false}
-            mixedContentMode="compatibility"
-            originWhitelist={['*']}
-            allowUniversalAccessFromFileURLs={true}
-            allowFileAccessFromFileURLs={true}
             onError={(syntheticEvent) => {
               const { nativeEvent } = syntheticEvent;
               console.error('WebView error: ', nativeEvent);

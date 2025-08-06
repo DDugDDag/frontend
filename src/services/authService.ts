@@ -1,7 +1,8 @@
 // src/services/authService.ts
 import Constants from 'expo-constants';
 import * as WebBrowser from 'expo-web-browser';
-import { makeRedirectUri, startAsync, AuthRequest } from 'expo-auth-session';
+import { makeRedirectUri, AuthRequest } from 'expo-auth-session';
+import { AuthSession } from 'expo-auth-session';
 import { APIResponse, User } from './types';
 
 // OAuth 완료를 위한 설정
@@ -70,7 +71,7 @@ class AuthService {
       console.log('Redirect URI:', this.redirectUri);
       
       // OAuth 인증 시작
-      const result = await startAsync({
+      const result = await AuthSession.startAsync({
         authUrl,
         returnUrl: this.redirectUri,
       });
