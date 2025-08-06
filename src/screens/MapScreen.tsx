@@ -17,17 +17,10 @@ import NavigationPanel from "@/components/navigation/NavigationPanel";
 import BikeInfoPanel from "@/components/map/BikeInfoPanel";
 import SmartRouteModal from "@/components/map/SmartRouteModal";
 import SmartRoutePanel from "@/components/map/SmartRoutePanel";
-import {
-  SearchIcon,
-  StarIcon,
-  CompassIcon,
-  HomeIcon,
-  MapIcon,
-} from "@/components/ui/Icons";
+import { SearchIcon, StarIcon } from "@/components/ui/Icons";
 import { useAppContext } from "@/stores/AppContext";
 import { stationService, aiRouteService } from "@/services";
 import { Colors } from "@/constants/Colors";
-
 
 export default function MapScreen() {
   const navigation = useNavigation();
@@ -687,7 +680,6 @@ export default function MapScreen() {
     }
   };
 
-
   const handleSmartRouteSubmit = async (data: {
     mode: "bike" | "walk";
     time?: number;
@@ -767,7 +759,6 @@ export default function MapScreen() {
           </TouchableOpacity>
         </View>
 
-
         {/* 지도 WebView */}
         <View style={styles.mapContainer}>
           <WebView
@@ -781,16 +772,16 @@ export default function MapScreen() {
             scrollEnabled={false}
             showsHorizontalScrollIndicator={false}
             showsVerticalScrollIndicator={false}
-            originWhitelist={['*']}
+            originWhitelist={["*"]}
             allowsInlineMediaPlayback={true}
             mediaPlaybackRequiresUserAction={false}
             onError={(syntheticEvent) => {
               const { nativeEvent } = syntheticEvent;
-              console.error('WebView error: ', nativeEvent);
+              console.error("WebView error: ", nativeEvent);
             }}
             onHttpError={(syntheticEvent) => {
               const { nativeEvent } = syntheticEvent;
-              console.error('WebView HTTP error: ', nativeEvent);
+              console.error("WebView HTTP error: ", nativeEvent);
             }}
           />
         </View>
@@ -821,7 +812,7 @@ export default function MapScreen() {
           }}
         />
 
-        {/* 하단 네비게이션 (임시) */}
+        {/* 하단 네비게이션 (임시)
         <View style={styles.bottomNavigation}>
           <TouchableOpacity style={[styles.navButton, styles.activeNavButton]}>
             <CompassIcon size={24} color={Colors.text} />
@@ -832,8 +823,7 @@ export default function MapScreen() {
           <TouchableOpacity style={styles.navButton} onPress={toggleNavigation}>
             <MapIcon size={24} color="#666" />
           </TouchableOpacity>
-        </View>
-
+        </View> */}
 
         {/* AI 목적지 추천 모달 */}
         <SmartRouteModal

@@ -212,7 +212,7 @@ export default function SearchScreen() {
         });
 
         // 지도 화면으로 이동
-        navigation.navigate("Map" as never);
+        navigation.navigate("MainTabs" as never);
       } else {
         console.error("경로 찾기 실패:", routeResponse.error);
 
@@ -224,13 +224,13 @@ export default function SearchScreen() {
           destination.location
         );
 
-        navigation.navigate("Map" as never);
+        navigation.navigate("MainTabs" as never);
       }
     } catch (error) {
       console.error("경로 찾기 예외:", error);
 
       // 에러 시에도 지도로 이동 (선택된 위치만 표시)
-      navigation.navigate("Map" as never);
+      navigation.navigate("MainTabs" as never);
     } finally {
       setIsLoading(false);
       actions.clearSearch();
