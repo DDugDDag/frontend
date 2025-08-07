@@ -26,10 +26,9 @@ export const homeHeaderStyles = StyleSheet.create({
   },
   weatherCard: {
     backgroundColor: '#FFF4D6',
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: 24,
+    height: 190,
     marginTop: 16,
-    alignItems: 'center',
   },
   weatherTemp: {
     fontSize: 18,
@@ -42,13 +41,14 @@ export const homeHeaderStyles = StyleSheet.create({
     marginBottom: 12,
   },
   weatherButton: {
-    backgroundColor: '#5B913B',
-    paddingVertical: 10,
+    backgroundColor: '#77B254',
+    height: 40,
     paddingHorizontal: 24,
-    borderRadius: 16,
+    borderRadius: 24,
+    justifyContent: 'center',  // 수직 정렬
+    alignItems: 'center',      // 수평 정렬
   },
   weatherButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: '#3B1E1E',
   },
 });
