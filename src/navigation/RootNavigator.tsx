@@ -7,7 +7,15 @@ import LoginScreen from "@/screens/LoginScreen";
 import SearchScreen from "@/screens/SearchScreen";
 import MainTabs from "@/navigation/MainTabs";
 
-const Stack = createNativeStackNavigator();
+export type RootStackParamList = {
+  Splash: undefined;
+  Onboarding: undefined;
+  Login: undefined;
+  Search: undefined;
+  MainTabs: undefined;
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
   return (

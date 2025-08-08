@@ -139,8 +139,11 @@ export default function MapScreen() {
     }));
 
     const stationsJS = JSON.stringify(stations);
-    const selectedStationId = state.stations.selectedStation?.station_id || null;
-    const nativeAppKey = Constants.expoConfig?.extra?.KAKAO_NATIVE_APP_KEY || "15107af70ffc7646a128bd53e0ff9c3e";
+    const selectedStationId =
+      state.stations.selectedStation?.station_id || null;
+    const nativeAppKey =
+      Constants.expoConfig?.extra?.KAKAO_NATIVE_APP_KEY ||
+      "15107af70ffc7646a128bd53e0ff9c3e";
 
     return `
     <!DOCTYPE html>
@@ -345,27 +348,27 @@ export default function MapScreen() {
   const handleWebViewMessage = (event: any) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
-      
+
       console.log("WebView 메시지:", data.type, data.data);
-      
+
       switch (data.type) {
-        case 'map_status':
+        case "map_status":
           console.log("카카오맵 상태:", data.data);
           break;
-        case 'map_error':
+        case "map_error":
           console.error("카카오맵 에러:", data.data);
           Alert.alert("지도 오류", data.data);
           break;
-        case 'marker_click':
+        case "marker_click":
           console.log("마커 클릭:", data.data);
           const station = state.stations.allStations.find(
-            s => s.station_id === data.data.id
+            (s) => s.station_id === data.data.id
           );
           if (station) {
             actions.selectStation(station);
           }
           break;
-        case 'map_click':
+        case "map_click":
           console.log("지도 클릭:", data.data);
           actions.setSelectedLocation(data.data.lat, data.data.lng);
           break;
@@ -418,7 +421,8 @@ export default function MapScreen() {
             duration: response.data.totalDuration,
             mode: response.data.routeType,
           },
-          segments: response.data.segments,
+          instructions: [],
+          nearby_stations: [],
         });
 
         // 목적지를 선택된 위치로 설정
@@ -473,7 +477,7 @@ export default function MapScreen() {
             javaScriptEnabled={true}
             domStorageEnabled={true}
             onMessage={handleWebViewMessage}
-            originWhitelist={['*']}
+            originWhitelist={["*"]}
             mixedContentMode="always"
             allowsInlineMediaPlayback={true}
             mediaPlaybackRequiresUserAction={false}

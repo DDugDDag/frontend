@@ -268,6 +268,8 @@ export default function SearchScreen() {
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
+            accessibilityRole="button"
+            accessibilityLabel="뒤로 가기"
           >
             <BackIcon size={24} color="#3B1E1E" />
           </TouchableOpacity>
@@ -305,7 +307,7 @@ export default function SearchScreen() {
               <TextInput
                 ref={destinationInputRef}
                 style={styles.destinationInput}
-                placeholder="동"
+                placeholder="목적지를 입력하세요"
                 placeholderTextColor="#999"
                 value={state.search.query}
                 onChangeText={actions.setSearchQuery}
@@ -361,6 +363,8 @@ export default function SearchScreen() {
           <TouchableOpacity
             style={styles.voiceButton}
             onPress={handleVoiceInput}
+            accessibilityRole="button"
+            accessibilityLabel="음성 입력"
           >
             <MicIcon size={20} color="#FFCF50" />
           </TouchableOpacity>
@@ -370,6 +374,8 @@ export default function SearchScreen() {
             <TouchableOpacity
               style={styles.searchRouteButton}
               onPress={handleSearchRoute}
+              accessibilityRole="button"
+              accessibilityLabel="경로 찾기"
             >
               <Text style={styles.searchRouteText}>경로 찾기</Text>
             </TouchableOpacity>
