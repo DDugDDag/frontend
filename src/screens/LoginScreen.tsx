@@ -35,9 +35,9 @@ export default function LoginScreen() {
         console.log("카카오 로그인 성공:", response.data.user);
 
         // 메인 화면으로 이동
-        navigation.navigate("MainTabs", {
-          screen: "Home",
-        });
+        navigation.navigate('MainTabs', {
+        screen: 'Home',
+      });
       } else {
         Alert.alert("로그인 실패", response.error || "로그인에 실패했습니다.");
       }
