@@ -1,8 +1,10 @@
 // src/services/authService.ts
-import Constants from 'expo-constants';
-import * as WebBrowser from 'expo-web-browser';
-import { makeRedirectUri, AuthRequest } from 'expo-auth-session';
-import { APIResponse, User } from './types';
+import Constants from "expo-constants";
+import * as WebBrowser from "expo-web-browser";
+import { makeRedirectUri, AuthRequest } from "expo-auth-session";
+import { APIResponse, User } from "./types";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { setAuthToken } from "./api";
 
 // OAuth 완료를 위한 설정
 WebBrowser.maybeCompleteAuthSession();
@@ -42,250 +44,146 @@ interface KakaoUserResponse {
 }
 
 class AuthService {
-  private kakaoRestApiKey = Constants.expoConfig?.extra?.KAKAO_REST_API_KEY || '5fd93db4631259c8576b6ce26b8fc125';
+  private kakaoRestApiKey = Constants.expoConfig?.extra?.KAKAO_REST_API_KEY || "";
   private kakaoAccountEmail = Constants.expoConfig?.extra?.KAKAO_ACCOUNT_EMAIL;
   private kakaoAccountPassword = Constants.expoConfig?.extra?.KAKAO_ACCOUNT_PASSWORD;
-  private redirectUri = makeRedirectUri({
-    scheme: 'ddudda',
-    path: 'oauth',
-  });
+  private redirectUri = makeRedirectUri({ scheme: "ddudda", path: "oauth" });
+  private static TOKEN_KEY = "@ddudda/token";
 
-  /**
-   * 카카오 OAuth 로그인을 시작합니다
-   */
+  /** 카카오 OAuth 로그인을 시작합니다 */
   async loginWithKakao(): Promise<APIResponse<{ user: User; accessToken: string }>> {
     try {
-      console.log('카카오 OAuth 로그인 시작');
-      
       if (!this.kakaoRestApiKey) {
-        return {
-          error: 'KAKAO_REST_API_KEY가 설정되지 않았습니다.',
-          status: 400,
-        };
+        return { error: "KAKAO_REST_API_KEY가 설정되지 않았습니다.", status: 400 };
       }
 
-      // OAuth 인증 URL 구성
       const authUrl = this.buildKakaoAuthUrl();
-      console.log('OAuth URL:', authUrl);
-      console.log('Redirect URI:', this.redirectUri);
-      
-      // OAuth 인증 시작 (WebBrowser 사용)
-      const result = await WebBrowser.openAuthSessionAsync(
-        authUrl,
-        this.redirectUri
-      );
-      
-      console.log('OAuth 결과:', result);
-      
-      if (result.type === 'success' && result.url) {
-        console.log('인증 성공:', result.url);
-        
-        // URL에서 인증 코드 추출
+      const result = await WebBrowser.openAuthSessionAsync(authUrl, this.redirectUri);
+
+      if (result.type === "success" && result.url) {
         const url = new URL(result.url);
-        const code = url.searchParams.get('code');
-        
-        if (!code) {
-          return {
-            error: '인증 코드를 받을 수 없습니다.',
-            status: 400,
-          };
-        }
-        
-        console.log('인증 코드 획득:', code);
-        
-        // 액세스 토큰 교환
+        const code = url.searchParams.get("code");
+        if (!code) return { error: "인증 코드를 받을 수 없습니다.", status: 400 };
+
         const tokenResponse = await this.exchangeCodeForToken(code);
-        console.log('토큰 응답:', tokenResponse);
-        
-        // 사용자 정보 가져오기
         const userResponse = await this.getKakaoUserInfo(tokenResponse.access_token);
-        console.log('사용자 정보:', userResponse);
-        
+
         const user: User = {
           id: `kakao_${userResponse.id}`,
-          name: userResponse.kakao_account?.profile?.nickname || userResponse.properties?.nickname || '뚜따 사용자',
-          email: userResponse.kakao_account?.email || this.kakaoAccountEmail || '',
-          profileImage: userResponse.kakao_account?.profile?.profile_image_url || userResponse.properties?.profile_image || '',
-          provider: 'kakao',
+          name: userResponse.kakao_account?.profile?.nickname || userResponse.properties?.nickname || "뚜따 사용자",
+          email: userResponse.kakao_account?.email || this.kakaoAccountEmail || "",
+          profileImage:
+            userResponse.kakao_account?.profile?.profile_image_url ||
+            userResponse.properties?.profile_image ||
+            "",
+          provider: "kakao",
           preferences: {
             scenic_route: false,
             prioritize_safety: true,
             avoid_hills: false,
-            preferred_speed: 'normal',
+            preferred_speed: "normal",
           },
         };
-        
-        console.log('변환된 사용자 정보:', user);
-        
-        return {
-          data: { user, accessToken: tokenResponse.access_token },
-          status: 200,
-        };
-      } else if (result.type === 'dismiss') {
-        return {
-          error: '사용자가 로그인을 취소했습니다.',
-          status: 400,
-        };
+
+        // 토큰 저장 및 API 클라이언트에 주입
+        await AsyncStorage.setItem(AuthService.TOKEN_KEY, tokenResponse.access_token);
+        await setAuthToken(tokenResponse.access_token);
+
+        return { data: { user, accessToken: tokenResponse.access_token }, status: 200 };
+      } else if (result.type === "dismiss") {
+        return { error: "사용자가 로그인을 취소했습니다.", status: 400 };
       } else {
-        console.error('OAuth 결과 처리 실패:', result);
-        
-        // 개발 중이므로 더미 데이터로 fallback
+        if (__DEV__) {
+          const fallbackUser: User = {
+            id: "kakao_ddudda_official",
+            name: "뚜따 공식 계정",
+            email: this.kakaoAccountEmail || "officalddudda@kakao.com",
+            profileImage: "",
+            provider: "kakao",
+            preferences: {
+              scenic_route: false,
+              prioritize_safety: true,
+              avoid_hills: false,
+              preferred_speed: "normal",
+            },
+          };
+          await setAuthToken("fallback_access_token");
+          await AsyncStorage.setItem(AuthService.TOKEN_KEY, "fallback_access_token");
+          return { data: { user: fallbackUser, accessToken: "fallback_access_token" }, status: 200 };
+        }
+        return { error: "로그인에 실패했습니다.", status: 500 };
+      }
+    } catch (error: any) {
+      if (__DEV__) {
         const fallbackUser: User = {
-          id: 'kakao_ddudda_official',
-          name: '뚜따 공식 계정',
-          email: this.kakaoAccountEmail || 'officalddudda@kakao.com',
-          profileImage: '',
-          provider: 'kakao',
+          id: "kakao_ddudda_official",
+          name: "뚜따 공식 계정",
+          email: this.kakaoAccountEmail || "officalddudda@kakao.com",
+          profileImage: "",
+          provider: "kakao",
           preferences: {
             scenic_route: false,
             prioritize_safety: true,
             avoid_hills: false,
-            preferred_speed: 'normal',
+            preferred_speed: "normal",
           },
         };
-        
-        console.log('OAuth 실패로 fallback 사용자 사용:', fallbackUser);
-        
-        return {
-          data: {
-            user: fallbackUser,
-            accessToken: 'fallback_access_token',
-          },
-          status: 200,
-        };
+        await setAuthToken("fallback_access_token");
+        await AsyncStorage.setItem(AuthService.TOKEN_KEY, "fallback_access_token");
+        return { data: { user: fallbackUser, accessToken: "fallback_access_token" }, status: 200 };
       }
-      
-    } catch (error: any) {
-      console.error('카카오 로그인 예외:', error);
-      
-      // 개발 중이므로 예외 발생 시에도 fallback 사용자 제공
-      const fallbackUser: User = {
-        id: 'kakao_ddudda_official',
-        name: '뚜따 공식 계정',
-        email: this.kakaoAccountEmail || 'officalddudda@kakao.com',
-        profileImage: '',
-        provider: 'kakao',
-        preferences: {
-          scenic_route: false,
-          prioritize_safety: true,
-          avoid_hills: false,
-          preferred_speed: 'normal',
-        },
-      };
-      
-      console.log('예외 발생으로 fallback 사용자 사용:', fallbackUser);
-      
-      return {
-        data: {
-          user: fallbackUser,
-          accessToken: 'fallback_access_token',
-        },
-        status: 200,
-      };
+      return { error: "로그인 중 오류가 발생했습니다.", status: 500 };
     }
   }
 
-  /**
-   * 로그아웃을 처리합니다
-   */
+  /** 로그아웃 처리 */
   async logout(): Promise<APIResponse<boolean>> {
     try {
-      console.log('로그아웃 처리');
-      
-      // TODO: 카카오 로그아웃 API 호출
-      // await this.revokeKakaoToken();
-      
-      return {
-        data: true,
-        status: 200,
-      };
+      await AsyncStorage.removeItem(AuthService.TOKEN_KEY);
+      await setAuthToken(null);
+      return { data: true, status: 200 };
     } catch (error: any) {
-      console.error('로그아웃 예외:', error);
-      return {
-        error: '로그아웃 중 오류가 발생했습니다.',
-        status: 500,
-      };
+      return { error: "로그아웃 중 오류가 발생했습니다.", status: 500 };
     }
   }
 
-  /**
-   * 카카오 OAuth URL을 생성합니다
-   */
+  /** 카카오 OAuth URL 생성 */
   private buildKakaoAuthUrl(): string {
     const params = new URLSearchParams({
       client_id: this.kakaoRestApiKey,
       redirect_uri: this.redirectUri,
-      response_type: 'code',
-      scope: 'profile_nickname,profile_image,account_email',
-      state: 'ddudda_oauth_state',
+      response_type: "code",
+      scope: "profile_nickname,profile_image,account_email",
+      state: "ddudda_oauth_state",
     });
-
     return `https://kauth.kakao.com/oauth/authorize?${params.toString()}`;
   }
 
-  /**
-   * 인증 코드를 액세스 토큰으로 교환합니다
-   */
+  /** 토큰 교환 */
   private async exchangeCodeForToken(code: string): Promise<KakaoTokenResponse> {
-    console.log('토큰 교환 시작:', { code, redirectUri: this.redirectUri });
-    
-    const response = await fetch('https://kauth.kakao.com/oauth/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+    const response = await fetch("https://kauth.kakao.com/oauth/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
-        grant_type: 'authorization_code',
+        grant_type: "authorization_code",
         client_id: this.kakaoRestApiKey,
         redirect_uri: this.redirectUri,
         code,
       }).toString(),
     });
-
     const responseText = await response.text();
-    console.log('토큰 교환 응답:', responseText);
-    
-    if (!response.ok) {
-      throw new Error(`토큰 교환 실패: ${response.status} - ${responseText}`);
-    }
-
+    if (!response.ok) throw new Error(`토큰 교환 실패: ${response.status} - ${responseText}`);
     return JSON.parse(responseText);
   }
 
-  /**
-   * 카카오 사용자 정보를 가져옵니다
-   */
+  /** 사용자 정보 */
   private async getKakaoUserInfo(accessToken: string): Promise<KakaoUserResponse> {
-    console.log('사용자 정보 조회 시작:', accessToken.substring(0, 10) + '...');
-    
-    const response = await fetch('https://kapi.kakao.com/v2/user/me', {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-      },
+    const response = await fetch("https://kapi.kakao.com/v2/user/me", {
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
-
     const responseText = await response.text();
-    console.log('사용자 정보 응답:', responseText);
-    
-    if (!response.ok) {
-      throw new Error(`사용자 정보 조회 실패: ${response.status} - ${responseText}`);
-    }
-
+    if (!response.ok) throw new Error(`사용자 정보 조회 실패: ${response.status} - ${responseText}`);
     return JSON.parse(responseText);
-  }
-
-  /**
-   * 카카오 토큰을 무효화합니다
-   */
-  private async revokeKakaoToken(accessToken?: string): Promise<void> {
-    if (!accessToken) return;
-
-    await fetch('https://kapi.kakao.com/v1/user/logout', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-      },
-    });
   }
 }
 

@@ -1,5 +1,5 @@
 // src/components/navigation/NavigationPanel.tsx
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { useAppContext } from "@/stores/AppContext";
 import { navigationService } from "@/services";
@@ -75,6 +75,16 @@ export default function NavigationPanel({
   };
 
   // 경로 요약 정보 (내비게이션이 시작되지 않은 경우)
+  useEffect(() => {
+    return () => {
+      try {
+        if (navigationService.isNavigationActive()) {
+          navigationService.stopNavigation();
+        }
+      } catch {}
+    };
+  }, []);
+
   if (!state.map.isNavigating && state.map.currentRoute) {
     return (
       <View style={styles.routeSummaryPanel}>

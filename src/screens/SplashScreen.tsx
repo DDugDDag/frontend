@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  logo: { width: 100, height: undefined, aspectRatio: 1, marginBottom: 50 },
+  logo: { width: 100,height: undefined, aspectRatio: 1, marginBottom: 50 },
   button: {
     backgroundColor: "white",
     paddingHorizontal: 40,

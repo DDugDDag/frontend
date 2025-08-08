@@ -1,3 +1,10 @@
+const backendUrl =
+  process.env.EXPO_PUBLIC_BACKEND_API_URL || "http://localhost:8000";
+
+const KAKAO_NATIVE_APP_KEY = process.env.EXPO_PUBLIC_KAKAO_NATIVE_APP_KEY || "";
+const KAKAO_REST_API_KEY = process.env.EXPO_PUBLIC_KAKAO_REST_API_KEY || "";
+const KAKAO_ADMIN_KEY = process.env.EXPO_PUBLIC_KAKAO_ADMIN_KEY || "";
+
 export default {
   expo: {
     name: "ddudda",
@@ -5,23 +12,23 @@ export default {
     scheme: "ddudda",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/logo.png",
+    icon: "./assets/icon.png",
     userInterfaceStyle: "light",
-    newArchEnabled: true,
+    newArchEnabled: false,
     extra: {
-      KAKAO_MAP_API_KEY: "56ac12d7a683657de44a0eb57d30fe28",
-      KAKAO_REST_API_KEY: "d8e8864518cbfa343f7de2c130b20e4e",
-      KAKAO_NATIVE_APP_KEY: "15107af70ffc7646a128bd53e0ff9c3e",
-      KAKAO_ADMIN_KEY: "3e32df8c56eb05f891be69ff32737c38",
-      BACKEND_API_URL: "http://localhost:8000",
+      KAKAO_MAP_API_KEY: KAKAO_REST_API_KEY,
+      KAKAO_REST_API_KEY: KAKAO_REST_API_KEY,
+      KAKAO_NATIVE_APP_KEY: KAKAO_NATIVE_APP_KEY,
+      KAKAO_ADMIN_KEY: KAKAO_ADMIN_KEY,
+      BACKEND_API_URL: backendUrl,
       eas: {
-        projectId: "95a7097f-38a0-4814-848d-430a25366eca"
-      }
+        projectId: "95a7097f-38a0-4814-848d-430a25366eca",
+      },
     },
     splash: {
       image: "./assets/logo.png",
       resizeMode: "contain",
-      backgroundColor: "#ffffff"
+      backgroundColor: "#ffffff",
     },
     assetBundlePatterns: ["**/*"],
     jsEngine: "jsc",
@@ -30,48 +37,57 @@ export default {
       jsEngine: "jsc",
       bundleIdentifier: "com.ddudda.app",
       infoPlist: {
-        NSLocationWhenInUseUsageDescription: "뚜따 앱이 자전거 내비게이션을 위해 위치 정보를 사용합니다.",
-        NSLocationAlwaysAndWhenInUseUsageDescription: "뚜따 앱이 자전거 내비게이션을 위해 위치 정보를 사용합니다.",
-        ITSAppUsesNonExemptEncryption: false
-      }
+        NSLocationWhenInUseUsageDescription:
+          "뚜따 앱이 자전거 내비게이션을 위해 위치 정보를 사용합니다.",
+        NSLocationAlwaysAndWhenInUseUsageDescription:
+          "뚜따 앱이 자전거 내비게이션을 위해 위치 정보를 사용합니다.",
+        ITSAppUsesNonExemptEncryption: false,
+      },
     },
     android: {
       jsEngine: "jsc",
       package: "com.ddudda.app",
       adaptiveIcon: {
-        foregroundImage: "./assets/logo.png",
-        backgroundColor: "#ffffff"
+        foregroundImage: "./assets/adaptive-icon.png",
+        backgroundColor: "#ffffff",
       },
       edgeToEdgeEnabled: true,
-      permissions: ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION", "INTERNET"],
-      usesCleartextTraffic: false
+      permissions: [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "INTERNET",
+      ],
     },
     web: {
-      favicon: "./assets/logo.png"
+      favicon: "./assets/favicon.png",
     },
     plugins: [
       [
         "expo-location",
         {
-          locationAlwaysAndWhenInUsePermission: "뚜따 앱이 자전거 내비게이션을 위해 위치 정보를 사용합니다."
-        }
+          locationAlwaysAndWhenInUsePermission:
+            "뚜따 앱이 자전거 내비게이션을 위해 위치 정보를 사용합니다.",
+        },
       ],
       [
         "expo-build-properties",
         {
           android: {
             extraMavenRepos: [
-              "https://devrepo.kakao.com/nexus/content/groups/public/"
-            ]
-          }
-        }
+              "https://devrepo.kakao.com/nexus/content/groups/public/",
+            ],
+          },
+          ios: {
+            useFrameworks: "static",
+          },
+        },
       ],
       [
         "@react-native-kakao/core",
         {
-          nativeAppKey: "15107af70ffc7646a128bd53e0ff9c3e"
-        }
-      ]
-    ]
-  }
+          nativeAppKey: KAKAO_NATIVE_APP_KEY,
+        },
+      ],
+    ],
+  },
 };

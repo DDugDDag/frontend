@@ -1,4 +1,5 @@
 // src/components/layout/ScreenWrapper.tsx
+
 import React, { ReactNode } from "react";
 import {
   Platform,
@@ -37,7 +38,6 @@ export default function ScreenWrapper({
       style={[styles.safeArea, { backgroundColor }]}
       edges={["top", "left", "right"]}
     >
-      {/* Expo 상태바 - iOS, Android 공통 */}
       <ExpoStatusBar style={statusBarStyle} />
 
       <View style={{ flex: 1 }}>
@@ -140,6 +140,7 @@ const styles = StyleSheet.create({
 // import ScreenWrapper from "../components/layout/ScreenWrapper";
 // import { Text, View, TouchableOpacity } from "react-native";
 
+
 // export default function ScreenWithFooter() {
 //   const footer = (
 //     <View
@@ -175,4 +176,3 @@ const styles = StyleSheet.create({
 //     </ScreenWrapper>
 //   );
 // }
-// ```
