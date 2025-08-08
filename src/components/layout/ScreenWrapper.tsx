@@ -140,6 +140,7 @@ const styles = StyleSheet.create({
 // import ScreenWrapper from "../components/layout/ScreenWrapper";
 // import { Text, View, TouchableOpacity } from "react-native";
 
+
 // export default function ScreenWithFooter() {
 //   const footer = (
 //     <View
@@ -164,10 +165,6 @@ const styles = StyleSheet.create({
 // }
 // ```
 
-// ---
-
-// ### ✅ 커스텀 Footer 스타일
-
 // ```tsx
 // export default function CustomFooterScreen() {
 //   return (
@@ -179,4 +176,3 @@ const styles = StyleSheet.create({
 //     </ScreenWrapper>
 //   );
 // }
-// ```

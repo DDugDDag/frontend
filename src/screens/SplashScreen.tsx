@@ -8,10 +8,10 @@ export default function SplashScreen() {
   const navigation = useNavigation();
 
   return (
-    <ScreenWrapper backgroundColor={Colors.accent}>
+    <ScreenWrapper backgroundColor={Colors.primary}>
       <View style={styles.container}>
         <Image
-          source={require("@/assets/images/logo.png")}
+          source={require("../../assets/logo.png")}
           style={styles.logo}
           resizeMode="contain"
         />
