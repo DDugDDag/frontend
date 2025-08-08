@@ -30,4 +30,3 @@ export default function RootNavigator() {
       <Stack.Screen name="MainTabs" component={MainTabs} />
     </Stack.Navigator>
   );
-}
