@@ -4,6 +4,7 @@ const backendUrl =
 const KAKAO_NATIVE_APP_KEY = process.env.EXPO_PUBLIC_KAKAO_NATIVE_APP_KEY || "";
 const KAKAO_REST_API_KEY = process.env.EXPO_PUBLIC_KAKAO_REST_API_KEY || "";
 const KAKAO_ADMIN_KEY = process.env.EXPO_PUBLIC_KAKAO_ADMIN_KEY || "";
+const WEATHER_API_KEY = process.env.EXPO_PUBLIC_WEATHER_API_KEY || "";
 
 export default {
   expo: {
@@ -21,6 +22,7 @@ export default {
       KAKAO_NATIVE_APP_KEY: KAKAO_NATIVE_APP_KEY,
       KAKAO_ADMIN_KEY: KAKAO_ADMIN_KEY,
       BACKEND_API_URL: backendUrl,
+      WEATHER_API_KEY: WEATHER_API_KEY,
       eas: {
         projectId: "95a7097f-38a0-4814-848d-430a25366eca",
       },

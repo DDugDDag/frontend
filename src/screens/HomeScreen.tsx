@@ -6,7 +6,7 @@ import ScreenWrapper from "@/components/layout/ScreenWrapper";
 import { homeHeaderStyles as h } from "@/styles/user";
 import { nearbyStyles as n } from "@/styles/nearby";
 import * as Location from "expo-location";
-import { WEATHER_API_KEY } from "@env";
+import Constants from "expo-constants";
 import { apiClient } from "@/services";
 
 const today = new Date();
@@ -45,17 +45,20 @@ export default function HomeScreen() {
         const { latitude, longitude } = loc.coords;
 
         // 날씨
-        const weatherResp = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}&units=metric&lang=kr`
-        );
-        if (weatherResp.ok) {
-          const w = await weatherResp.json();
-          setWeather({
-            temp: Math.round(w?.main?.temp ?? 0),
-            condition: w?.weather?.[0]?.description ?? "",
-            area: w?.name ?? "",
-            icon: w?.weather?.[0]?.icon ?? "",
-          });
+        const KEY = Constants.expoConfig?.extra?.WEATHER_API_KEY;
+        if (KEY) {
+          const weatherResp = await fetch(
+            `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${KEY}&units=metric&lang=kr`
+          );
+          if (weatherResp.ok) {
+            const w = await weatherResp.json();
+            setWeather({
+              temp: Math.round(w?.main?.temp ?? 0),
+              condition: w?.weather?.[0]?.description ?? "",
+              area: w?.name ?? "",
+              icon: w?.weather?.[0]?.icon ?? "",
+            });
+          }
         }
 
         // 근처 정류소(백엔드)
