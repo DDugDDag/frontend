@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 const backendUrl =
   process.env.EXPO_PUBLIC_BACKEND_API_URL || "http://localhost:8000";
 
@@ -15,7 +17,7 @@ export default {
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
-    newArchEnabled: false,
+    newArchEnabled: true,
     extra: {
       KAKAO_MAP_API_KEY: KAKAO_REST_API_KEY,
       KAKAO_REST_API_KEY: KAKAO_REST_API_KEY,
@@ -33,10 +35,10 @@ export default {
       backgroundColor: "#ffffff",
     },
     assetBundlePatterns: ["**/*"],
-    jsEngine: "jsc",
+    jsEngine: "hermes",
     ios: {
       supportsTablet: true,
-      jsEngine: "jsc",
+      jsEngine: "hermes",
       bundleIdentifier: "com.ddudda.app",
       infoPlist: {
         NSLocationWhenInUseUsageDescription:
@@ -47,7 +49,7 @@ export default {
       },
     },
     android: {
-      jsEngine: "jsc",
+      jsEngine: "hermes",
       package: "com.ddudda.app",
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
@@ -80,7 +82,7 @@ export default {
             ],
           },
           ios: {
-            useFrameworks: "static",
+            useFrameworks: "dynamic",
           },
         },
       ],
