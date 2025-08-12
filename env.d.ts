@@ -6,5 +6,5 @@ declare namespace NodeJS {
     EXPO_PUBLIC_KAKAO_NATIVE_APP_KEY?: string;
     EXPO_PUBLIC_KAKAO_REST_API_KEY?: string;
     EXPO_PUBLIC_KAKAO_ADMIN_KEY?: string;
-  }
-}
+    EXPO_PUBLIC_WEATHER_API_KEY: string;
+}}

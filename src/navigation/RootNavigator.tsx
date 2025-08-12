@@ -29,4 +29,4 @@ export default function RootNavigator() {
       <Stack.Screen name="Search" component={SearchScreen} />
       <Stack.Screen name="MainTabs" component={MainTabs} />
     </Stack.Navigator>
-  );
+  )};

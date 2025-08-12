@@ -1,30 +1,19 @@
 {
-  "cli": {
-    "version": ">= 0.52.0",
-    "appVersionSource": "local"
-  },
+  "cli": { "version": ">= 13.0.0", "appVersionSource": "local" },
   "build": {
+    "simulator": {
+      "ios": { "simulator": true }
+    },
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "ios": {
-        "simulator": true,
-        "resourceClass": "m-medium"
-      }
-    },
-    "preview": {
-      "distribution": "internal",
-      "ios": {
-        "simulator": true
-      }
+      "ios": { "resourceClass": "m-medium" },
+      "android": { "gradleCommand": ":app:assembleDebug" }
     },
     "production": {
-      "ios": {
-        "resourceClass": "m-medium"
-      }
+      "autoIncrement": "version",
+      "ios": { "resourceClass": "m-medium" }
     }
   },
-  "submit": {
-    "production": {}
-  }
+  "submit": { "production": {} }
 }
