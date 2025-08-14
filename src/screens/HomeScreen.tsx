@@ -37,7 +37,7 @@ const nearbyStations: Station[] = [
   { id: '3', name: '한밭도서관', distance: '1.8 km', image: '3.jpg' },
 ];
 
-const BACKEND_API_URL = Constants.expoConfig?.extra?.BACKEND_API_URL || 'http://localhost:8000';
+const BACKEND_API_URL = Constants.expoConfig?.extra?.BACKEND_API_URL || 'http://localhost:8080';
 const username = "홍길동";
 export default function HomeScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);

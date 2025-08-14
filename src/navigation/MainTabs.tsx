@@ -7,7 +7,7 @@ import {
 
 import HomeScreen from "@/screens/HomeScreen";
 import MapScreen from "@/screens/MapScreen";
-import RecordScreen from "@/screens/RecordScreen";
+import RecordStack from "@/screens/Record/RecordStack"; // ✅ 스택으로 교체
 
 import { HomeIcon, MapIcon, RecordIcon } from "@/components/ui/Icons";
 
@@ -65,7 +65,7 @@ export default function MainTabs() {
     >
       <Tab.Screen name="Map" component={MapScreen} />
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Record" component={RecordScreen} />
+      <Tab.Screen name="Record" component={RecordStack} />
     </Tab.Navigator>
   );
 }

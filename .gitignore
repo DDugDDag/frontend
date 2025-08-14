@@ -49,3 +49,4 @@ tmp/
 temp/
 __generated__/
 *.tmp
+.idea

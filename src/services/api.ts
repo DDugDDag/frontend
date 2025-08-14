@@ -3,7 +3,7 @@ import Constants from 'expo-constants';
 import { APIResponse, APIError } from './types';
 
 // 환경 변수에서 API URL 가져오기
-const BACKEND_API_URL = Constants.expoConfig?.extra?.BACKEND_API_URL || 'http://localhost:8000';
+const BACKEND_API_URL = Constants.expoConfig?.extra?.BACKEND_API_URL || 'http://localhost:8080';
 
 class APIClient {
   private baseURL: string;
