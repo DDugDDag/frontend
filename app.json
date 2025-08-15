@@ -13,7 +13,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "jsEngine": "jsc",
     "ios": {
       "supportsTablet": true,
@@ -30,7 +32,13 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ],
+      "package": "com.ddudda.ddudda"
     },
     "web": {
       "favicon": "./src/assets/images/logo.png"
@@ -42,6 +50,11 @@
           "locationAlwaysAndWhenInUsePermission": "뚜따 앱이 자전거 내비게이션을 위해 위치 정보를 사용합니다."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "95a7097f-38a0-4814-848d-430a25366eca"
+      }
+    }
   }
 }

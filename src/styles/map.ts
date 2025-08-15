@@ -1,0 +1,101 @@
+import { StyleSheet } from "react-native";
+import { Colors } from '@/constants/Colors';
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  map: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+  },
+  searchContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "#fff",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  searchBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 25,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    elevation: 1,
+  },
+  searchIcon: {
+    width: 24,
+    height: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  searchPlaceholder: {
+    flex: 1,
+    fontSize: 16,
+    color: "#666",
+  },
+  favoriteButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.accent,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+  },
+  favoriteText: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: Colors.text,
+    marginLeft: 4,
+  },
+  mapContainer: {
+    flex: 1,
+  },
+  bottomNavigation: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  navButton: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+  activeNavButton: {
+    backgroundColor: Colors.accent,
+    borderRadius: 20,
+    marginHorizontal: 4,
+  },
+  testButtonsContainer: {
+    flexDirection: "row",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    gap: 12,
+  },
+  testButton: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  testButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+});
