@@ -94,6 +94,11 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.0"
+        def lp = new Properties()
+        def lpf = rootProject.file("local.properties")
+        if (lpf.exists()) lp.load(new FileInputStream(lpf))
+        def KAKAO_KEY = lp.getProperty("KAKAO_MAP_APP_KEY", "")
+        buildConfigField "String", "KAKAO_MAP_APP_KEY", "\"${KAKAO_KEY}\""
     }
     signingConfigs {
         debug {
@@ -150,7 +155,7 @@ android {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
-
+    implementation("com.kakao.maps.open:android:2.12.8")
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";
     def isWebpAnimatedEnabled = (findProperty('expo.webp.animated') ?: "") == "true";

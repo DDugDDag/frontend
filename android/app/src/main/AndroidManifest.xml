@@ -27,6 +27,7 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="ddudda"/>
+        <data android:scheme="exp+ddudda"/>
       </intent-filter>
     </activity>
   </application>

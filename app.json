@@ -7,7 +7,7 @@
     "orientation": "portrait",
     "icon": "./src/assets/images/logo.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./src/assets/images/logo.png",
       "resizeMode": "contain",
@@ -44,12 +44,10 @@
       "favicon": "./src/assets/images/logo.png"
     },
     "plugins": [
-      [
-        "expo-location",
-        {
-          "locationAlwaysAndWhenInUsePermission": "뚜따 앱이 자전거 내비게이션을 위해 위치 정보를 사용합니다."
-        }
-      ]
+      "expo-dev-client",
+      ["expo-location", {
+        "locationAlwaysAndWhenInUsePermission": "뚜따 앱이 자전거 내비게이션을 위해 위치 정보를 사용합니다."
+      }]
     ],
     "extra": {
       "eas": {
