@@ -140,11 +140,14 @@ export default function MapScreen() {
         <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
         <View style={styles.mapContainer}>
-          <KakaoMapView
-            stationList={state.stations.allStations}
-            onStationSelect={handleStationSelect}
-            onMapClick={handleMapClick}
-          />
+        <KakaoMapView
+          style={{ flex: 1 }}            // ✅ 추가
+          // 또는 style={StyleSheet.absoluteFillObject}
+          stationList={state.stations.allStations}
+          onStationSelect={handleStationSelect}
+          onMapClick={handleMapClick}
+          collapsable={false}            // ✅ 안드로이드 뷰 제거 방지
+        />
         </View>
 
         <View style={styles.searchContainer}>

@@ -10,6 +10,7 @@ interface MapClickEvent {
   lng: number;
 }
 
+
 // 네이티브 컴포넌트에 전달할 props 타입을 정의합니다.
 interface KakaoMapViewProps extends ViewProps {
   stationList?: any[]; // stationList prop을 추가합니다 (실제 Station 타입 사용 권장)
