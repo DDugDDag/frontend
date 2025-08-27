@@ -2,7 +2,7 @@
 import React from "react";
 import { View, Text, StyleSheet, Pressable, Image } from "react-native";
 import { ActivityRecord, fmtKm } from "@/types/activity";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 type Props = {
   record: ActivityRecord;

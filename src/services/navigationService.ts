@@ -1,37 +1,31 @@
 // src/services/navigationService.ts
-import { Platform } from 'react-native';
-import * as Location from 'expo-location';
+import { getCurrentPosition, type GeolocationResponse } from '@/utils/location';
 import { APIResponse } from './types';
 
 interface NavigationData {
-  currentSpeed: number; // km/h
-  currentHeading: number; // degrees
-  currentLocation: {
-    lat: number;
-    lng: number;
-    accuracy: number;
-  };
-  totalDistance: number; // km
-  remainingDistance: number; // km
-  estimatedTime: number; // minutes
+  currentSpeed: number;           // km/h
+  currentHeading: number;         // degrees
+  currentLocation: { lat: number; lng: number; accuracy: number };
+  totalDistance: number;          // km
+  remainingDistance: number;      // km
+  estimatedTime: number;          // minutes
   nextInstruction?: {
     type: 'left' | 'right' | 'straight' | 'finish';
     description: string;
-    distance: number; // meters
+    distance: number;             // meters
   };
 }
 
 class NavigationService {
   private isNavigating = false;
-  private locationSubscription: Location.LocationSubscription | null = null;
+  private tick: ReturnType<typeof setInterval> | null = null;
   private routePoints: Array<{ lat: number; lng: number }> = [];
   private currentRouteIndex = 0;
   private totalRouteDistance = 0;
-  private startTime: Date | null = null;
   private traveledDistance = 0;
 
   /**
-   * 실시간 내비게이션을 시작합니다
+   * 실시간 내비게이션 시작 (1초 주기 폴링)
    */
   async startNavigation(
     routePoints: Array<{ lat: number; lng: number }>,
@@ -39,252 +33,170 @@ class NavigationService {
     onError: (error: string) => void
   ): Promise<APIResponse<boolean>> {
     try {
-      console.log('실시간 내비게이션 시작');
-
-      // 위치 권한 확인
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        return {
-          error: '위치 권한이 필요합니다.',
-          status: 403,
-        };
-      }
-
       this.routePoints = routePoints;
       this.currentRouteIndex = 0;
       this.totalRouteDistance = this.calculateTotalDistance(routePoints);
-      this.startTime = new Date();
       this.traveledDistance = 0;
       this.isNavigating = true;
 
-      // 실시간 위치 추적 시작
-      this.locationSubscription = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.BestForNavigation,
-          timeInterval: 1000, // 1초마다 업데이트
-          distanceInterval: 5, // 5m 이동시 업데이트
-        },
-        (location) => {
+      // 매 1초 현재 위치 갱신
+      this.tick = setInterval(async () => {
+        try {
+          const pos = await getCurrentPosition({
+            enableHighAccuracy: true,
+            timeout: 8000,
+            maximumAge: 2000,
+          });
           if (this.isNavigating) {
-            this.processLocationUpdate(location, onUpdate, onError);
+            this.processLocationUpdate(pos, onUpdate, onError);
           }
+        } catch (e) {
+          onError('현재 위치를 가져오지 못했습니다.');
         }
-      );
+      }, 1000);
 
-      console.log('실시간 내비게이션 시작 완료');
-      return {
-        data: true,
-        status: 200,
-      };
-    } catch (error: any) {
-      console.error('내비게이션 시작 예외:', error);
-      return {
-        error: '내비게이션을 시작할 수 없습니다.',
-        status: 500,
-      };
+      return { data: true, status: 200 };
+    } catch (e) {
+      return { error: '내비게이션을 시작할 수 없습니다.', status: 500 };
     }
   }
 
   /**
-   * 실시간 내비게이션을 중지합니다
+   * 실시간 내비게이션 중지
    */
   async stopNavigation(): Promise<APIResponse<boolean>> {
     try {
-      console.log('실시간 내비게이션 중지');
-
       this.isNavigating = false;
-      
-      if (this.locationSubscription) {
-        this.locationSubscription.remove();
-        this.locationSubscription = null;
+      if (this.tick) {
+        clearInterval(this.tick);
+        this.tick = null;
       }
-
-      // 내비게이션 데이터 초기화
       this.routePoints = [];
       this.currentRouteIndex = 0;
       this.totalRouteDistance = 0;
-      this.startTime = null;
       this.traveledDistance = 0;
-
-      console.log('실시간 내비게이션 중지 완료');
-      return {
-        data: true,
-        status: 200,
-      };
-    } catch (error: any) {
-      console.error('내비게이션 중지 예외:', error);
-      return {
-        error: '내비게이션을 중지할 수 없습니다.',
-        status: 500,
-      };
+      return { data: true, status: 200 };
+    } catch (e) {
+      return { error: '내비게이션을 중지할 수 없습니다.', status: 500 };
     }
   }
 
-  /**
-   * 내비게이션 상태를 반환합니다
-   */
   isNavigationActive(): boolean {
     return this.isNavigating;
   }
 
   /**
-   * 위치 업데이트를 처리합니다
+   * 위치 업데이트 처리
    */
   private processLocationUpdate(
-    location: Location.LocationObject,
+    location: GeolocationResponse,
     onUpdate: (data: NavigationData) => void,
     onError: (error: string) => void
   ) {
     try {
       const currentLat = location.coords.latitude;
       const currentLng = location.coords.longitude;
-      const currentSpeed = (location.coords.speed || 0) * 3.6; // m/s를 km/h로 변환
-      const currentHeading = location.coords.heading || 0;
-      const accuracy = location.coords.accuracy || 0;
+      const currentSpeed = ((location.coords.speed ?? 0) as number) * 3.6; // m/s → km/h
+      const currentHeading = (location.coords.heading ?? 0) as number;
+      const accuracy = (location.coords.accuracy ?? 0) as number;
 
-      // 현재 위치에서 가장 가까운 경로 포인트 찾기
+      // 가장 가까운 경로 포인트
       const nearestPoint = this.findNearestRoutePoint(currentLat, currentLng);
-      
       if (nearestPoint.index > this.currentRouteIndex) {
         this.currentRouteIndex = nearestPoint.index;
       }
 
-      // 이동 거리 계산
+      // 이동/남은 거리
       if (this.currentRouteIndex > 0) {
         this.traveledDistance = this.calculateDistanceToIndex(this.currentRouteIndex);
       }
+      const remainingDistance = Math.max(
+        0,
+        this.totalRouteDistance - this.traveledDistance
+      );
 
-      // 남은 거리 계산
-      const remainingDistance = this.totalRouteDistance - this.traveledDistance;
-
-      // 예상 도착 시간 계산
+      // ETA
       const averageSpeed = currentSpeed > 0 ? currentSpeed : 15; // 기본 15km/h
-      const estimatedTime = Math.round((remainingDistance / averageSpeed) * 60); // 분 단위
+      const estimatedTime = Math.round((remainingDistance / averageSpeed) * 60);
 
-      // 다음 안내 계산
+      // 다음 안내(간단 로직)
       const nextInstruction = this.getNextInstruction();
 
-      const navigationData: NavigationData = {
+      onUpdate({
         currentSpeed,
         currentHeading,
-        currentLocation: {
-          lat: currentLat,
-          lng: currentLng,
-          accuracy,
-        },
+        currentLocation: { lat: currentLat, lng: currentLng, accuracy },
         totalDistance: this.totalRouteDistance,
         remainingDistance,
         estimatedTime,
         nextInstruction,
-      };
+      });
 
-      onUpdate(navigationData);
-
-      // 목적지 도착 확인
-      if (remainingDistance < 0.05) { // 50m 이내
+      // 도착 처리 (50m 이내)
+      if (remainingDistance < 0.05) {
         this.stopNavigation();
-        console.log('목적지 도착!');
       }
-    } catch (error: any) {
-      console.error('위치 업데이트 처리 예외:', error);
+    } catch (e) {
       onError('위치 정보 처리 중 오류가 발생했습니다.');
     }
   }
 
-  /**
-   * 현재 위치에서 가장 가까운 경로 포인트를 찾습니다
-   */
   private findNearestRoutePoint(lat: number, lng: number): { index: number; distance: number } {
-    let nearestIndex = 0;
+    let nearestIndex = this.currentRouteIndex;
     let minDistance = Infinity;
-
     for (let i = this.currentRouteIndex; i < this.routePoints.length; i++) {
-      const point = this.routePoints[i];
-      const distance = this.calculateDistance(lat, lng, point.lat, point.lng);
-      
-      if (distance < minDistance) {
-        minDistance = distance;
+      const p = this.routePoints[i];
+      const d = this.calculateDistance(lat, lng, p.lat, p.lng);
+      if (d < minDistance) {
+        minDistance = d;
         nearestIndex = i;
       }
     }
-
     return { index: nearestIndex, distance: minDistance };
   }
 
-  /**
-   * 경로의 총 거리를 계산합니다
-   */
   private calculateTotalDistance(points: Array<{ lat: number; lng: number }>): number {
-    let totalDistance = 0;
-    
+    let total = 0;
     for (let i = 1; i < points.length; i++) {
-      const prev = points[i - 1];
-      const curr = points[i];
-      totalDistance += this.calculateDistance(prev.lat, prev.lng, curr.lat, curr.lng);
+      total += this.calculateDistance(points[i - 1].lat, points[i - 1].lng, points[i].lat, points[i].lng);
     }
-    
-    return totalDistance;
+    return total;
   }
 
-  /**
-   * 특정 인덱스까지의 거리를 계산합니다
-   */
   private calculateDistanceToIndex(index: number): number {
-    let distance = 0;
-    
+    let sum = 0;
     for (let i = 1; i <= index && i < this.routePoints.length; i++) {
-      const prev = this.routePoints[i - 1];
-      const curr = this.routePoints[i];
-      distance += this.calculateDistance(prev.lat, prev.lng, curr.lat, curr.lng);
+      sum += this.calculateDistance(
+        this.routePoints[i - 1].lat,
+        this.routePoints[i - 1].lng,
+        this.routePoints[i].lat,
+        this.routePoints[i].lng
+      );
     }
-    
-    return distance;
+    return sum;
   }
 
-  /**
-   * 다음 안내 정보를 가져옵니다
-   */
   private getNextInstruction(): NavigationData['nextInstruction'] {
-    const nextIndex = this.currentRouteIndex + 5; // 5포인트 앞 확인
-    
+    const nextIndex = this.currentRouteIndex + 5;
     if (nextIndex >= this.routePoints.length - 1) {
-      return {
-        type: 'finish',
-        description: '목적지에 도착했습니다',
-        distance: 0,
-      };
+      return { type: 'finish', description: '목적지에 도착했습니다', distance: 0 };
     }
-
     const distanceToNext = this.calculateDistanceToIndex(nextIndex) - this.traveledDistance;
-
-    // 간단한 방향 안내 (실제로는 더 복잡한 로직 필요)
-    return {
-      type: 'straight',
-      description: '직진하세요',
-      distance: Math.round(distanceToNext * 1000), // km를 m로 변환
-    };
+    return { type: 'straight', description: '직진하세요', distance: Math.max(0, Math.round(distanceToNext * 1000)) };
   }
 
-  /**
-   * 두 좌표 간의 거리를 계산합니다 (하버사인 공식)
-   */
+  // 하버사인
   private calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-    const R = 6371; // 지구의 반지름 (km)
-    const dLat = this.toRadians(lat2 - lat1);
-    const dLng = this.toRadians(lng2 - lng1);
-    
-    const a = 
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) *
-      Math.sin(dLng / 2) * Math.sin(dLng / 2);
-    
+    const R = 6371;
+    const dLat = this.toRad(lat2 - lat1);
+    const dLng = this.toRad(lng2 - lng1);
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(this.toRad(lat1)) * Math.cos(this.toRad(lat2)) * Math.sin(dLng / 2) ** 2;
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
+    return R * c; // km
   }
-
-  private toRadians(degrees: number): number {
-    return degrees * (Math.PI / 180);
-  }
+  private toRad(deg: number) { return deg * (Math.PI / 180); }
 }
 
 export const navigationService = new NavigationService();

@@ -6,7 +6,7 @@ import { getAggregates } from "@/data/records";
 import { fmtKm, fmtMeter, fmtMin } from "@/types/activity";
 import MetricPill from "@/components/record/MetricPill";
 import { useNavigation } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export default function RecordStatsScreen() {
   const nav = useNavigation();

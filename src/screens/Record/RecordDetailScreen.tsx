@@ -6,8 +6,8 @@ import { getRecordById } from "@/data/records";
 import { fmtKm, fmtMin, fmtTimeHM, fmtYmdDot } from "@/types/activity";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { RecordStackRouteProp } from "@/screens/Record/RecordStack.types";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import MapView, { Polyline, Marker } from "react-native-maps";
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export default function RecordDetailScreen() {
   const nav = useNavigation();
@@ -59,7 +59,7 @@ export default function RecordDetailScreen() {
 
       {/* 지도 */}
       <View style={st.mapCard}>
-        <MapView
+        {/* <MapView
           style={{ width: "100%", height: 180, borderRadius: 16 }}
           initialRegion={{
             latitude: first.latitude,
@@ -71,7 +71,7 @@ export default function RecordDetailScreen() {
           {record.path && <Polyline coordinates={record.path} strokeWidth={4} />}
           <Marker coordinate={first} title="출발" />
           <Marker coordinate={last} title="도착" />
-        </MapView>
+        </MapView> */}
       </View>
 
       {/* 출발/도착 타임라인 */}

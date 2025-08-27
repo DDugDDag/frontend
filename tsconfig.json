@@ -1,28 +1,24 @@
 {
   "compilerOptions": {
-    "target": "es2021",
-    "lib": [
-      "dom",
-      "esnext"
-    ],
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
     "jsx": "react-native",
-    "moduleResolution": "nodenext",
-    "module": "nodenext",
+
     "strict": true,
-    "allowJs": true,
     "noEmit": true,
     "isolatedModules": true,
+    "allowJs": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "baseUrl": "./src",
+    "resolveJsonModule": true,
+
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
-    }
+      "@/*": ["src/*"]
+    },
+
+    "lib": ["esnext"]
   },
-  "include": [
-    "src",
-    "env.d.ts",
-    "App.tsx"
-  ],
-  "extends": "expo/tsconfig.base"
+  "include": ["src", "env.d.ts", "App.tsx"]
 }

@@ -1,27 +1,16 @@
 module.exports = function (api) {
   api.cache(true);
   return {
-    presets: ["babel-preset-expo"],
+    presets: ['module:@react-native/babel-preset'],
     plugins: [
-      [
-        "module:react-native-dotenv",
-        {
-          moduleName: "@env",
-          path: ".env",
-          safe: true,
-          allowUndefined: false,
-        },
-      ],
-      [
-        "module-resolver",
-        {
-          root: ["./src"],
-          extensions: [".js", ".jsx", ".ts", ".tsx"],
-          alias: {
-            "@": "./src",
-          },
-        },
-      ],
+      // ↓ 경로 별칭 쓰면 유지, 안 쓰면 이 블록 삭제해도 됨
+      ['module-resolver', {
+        root: ['./src'],
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+        alias: { '@': './src' },
+      }],
+      // ↓ 반드시 맨 마지막!
+      'react-native-reanimated/plugin',
     ],
   };
 };

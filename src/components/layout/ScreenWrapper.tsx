@@ -10,7 +10,6 @@ import {
   ViewStyle,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar as ExpoStatusBar } from "expo-status-bar";
 
 type Props = {
   children: ReactNode;
@@ -38,7 +37,7 @@ export default function ScreenWrapper({
       style={[styles.safeArea, { backgroundColor }]}
       edges={["top", "left", "right"]}
     >
-      <ExpoStatusBar style={statusBarStyle} />
+      <StatusBar barStyle="dark-content" translucent />
 
       <View style={{ flex: 1 }}>
         <Wrapper

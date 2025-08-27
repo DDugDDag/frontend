@@ -2,13 +2,14 @@
 
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
-import ScreenWrapper from "@/components/layout/ScreenWrapper";
+import ScreenWrapper from '@/components/layout/ScreenWrapper';
 import { homeHeaderStyles as h } from '@/styles/user';
 import { nearbyStyles as n } from '@/styles/nearby';
-import * as Location from 'expo-location';
+import { getCurrentPosition } from '@/utils/location'; // ← expo-location 대체 래퍼
 import axios from 'axios';
-import { WEATHER_API_KEY } from '@env';
-import Constants from 'expo-constants';
+import Config from 'react-native-config'; // ← .env 읽기
+
+const { WEATHER_API_KEY, BACKEND_API_URL } = Config;
 
 const today = new Date();
 const formattedDate = new Intl.DateTimeFormat('ko-KR', {
@@ -37,10 +38,12 @@ const nearbyStations: Station[] = [
   { id: '3', name: '한밭도서관', distance: '1.8 km', image: '3.jpg' },
 ];
 
-const BACKEND_API_URL = Constants.expoConfig?.extra?.BACKEND_API_URL || 'http://localhost:8080';
-const username = "홍길동";
+const API_HOST = BACKEND_API_URL || 'http://localhost:8080';
+const username = '홍길동';
+
 export default function HomeScreen() {
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  // expo-location의 타입 대신 우리가 쓰는 최소 타입으로 정의
+  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [weather, setWeather] = useState<Weather | null>(null);
   const [stations, setStations] = useState<Station[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,33 +51,26 @@ export default function HomeScreen() {
   useEffect(() => {
     (async () => {
       try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          console.warn('위치 권한 거부됨');
-          setLoading(false);
-          return;
-        }
-
-        const loc = await Location.getCurrentPositionAsync({});
-        setLocation(loc);
-
-        const { latitude, longitude } = loc.coords;
+        // 권한 + 현재 위치 (react-native-geolocation-service + react-native-permissions 사용)
+        const pos = await getCurrentPosition();
+        const { latitude, longitude } = pos.coords;
+        setLocation({ latitude, longitude });
 
         // ✅ 날씨 API 요청
         const weatherRes = await axios.get(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}&units=metric&lang=kr`
+          `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${WEATHER_API_KEY}&units=metric&lang=kr`,
         );
 
         const w = weatherRes.data;
         setWeather({
           temp: Math.round(w.main.temp),
-          condition: w.weather[0].description,
+          condition: w.weather?.[0]?.description ?? '',
           area: w.name,
-          icon: w.icon,
+          icon: w.weather?.[0]?.icon ?? '',
         });
 
         // ✅ 정류소 추천 요청
-        const stationRes = await axios.post('{host}/nearby', {
+        const stationRes = await axios.post(`${API_HOST}/nearby`, {
           lat: latitude,
           lon: longitude,
         });
@@ -102,7 +98,9 @@ export default function HomeScreen() {
       <View style={h.weatherCard}>
         {weather ? (
           <>
-            <Text style={h.weatherTemp}>{weather.icon} {weather.temp}° {weather.condition}</Text>
+            <Text style={h.weatherTemp}>
+              {weather.icon} {weather.temp}° {weather.condition}
+            </Text>
             <Text style={h.weatherLocation}>{weather.area}</Text>
           </>
         ) : (

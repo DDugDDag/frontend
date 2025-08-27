@@ -1,7 +1,8 @@
 // src/components/MetricPill.tsx
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 type Kind = "time" | "cal" | "distance" | "leaf";
 type Props = { kind: Kind; label: string; value: string };
