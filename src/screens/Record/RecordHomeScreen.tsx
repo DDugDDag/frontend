@@ -8,7 +8,8 @@ import { RECORDS, getAggregates } from "@/data/records";
 import { fmtKm, fmtMin } from "@/types/activity";
 import { useNavigation } from "@react-navigation/native";
 import { RecordStackNav } from "@/screens/Record/RecordStack.types";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
 
 export default function RecordHomeScreen() {
   const nav = useNavigation<RecordStackNav>();
