@@ -139,7 +139,7 @@ export default function MapScreen() {
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
-        <View style={styles.mapContainer}>
+        <View style={{flex:1, backgroundColor:'rgba(107, 107, 107, 1)'}}>
         <KakaoMapView
           style={{ flex: 1 }}            // ✅ 추가
           // 또는 style={StyleSheet.absoluteFillObject}

@@ -99,6 +99,7 @@ android {
         if (lpf.exists()) lp.load(new FileInputStream(lpf))
         def KAKAO_KEY = lp.getProperty("KAKAO_MAP_APP_KEY", "")
         buildConfigField "String", "KAKAO_MAP_APP_KEY", "\"${KAKAO_KEY}\""
+        manifestPlaceholders = [ KAKAO_MAP_APP_KEY: KAKAO_MAP_APP_KEY ]
     }
     signingConfigs {
         debug {
